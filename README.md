@@ -30,7 +30,7 @@
 | `dns-server` | 带 `#no-h3` | 关闭 DoH 自动升级 HTTP/3，省掉一次协商 |
 | `[MITM]` | `enable = false` | 不解密任何流量；`hostname` 已预置，将来要用只改 `enable` |
 
-规则集来自 [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)（`Apple` / `ChinaMax` / `GlobalMedia` / `AdvertisingLite` / `Privacy` 等）。
+规则集共 24 条：**21 条**来自 [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)（`Apple` / `ChinaMax` / `GlobalMedia` / `AdvertisingLite` / `Privacy` 等），**3 条**是自用列表。全部经**自建加速站** `git.521989.xyz` 拉取。
 
 ---
 
@@ -88,18 +88,18 @@
 | 规则集 | 上游更新 | 中间缓存 | 手机上最快可见 |
 | :--- | :--- | :--- | :--- |
 | 自用 3 条（`*-custom.list`） | 每 4 小时自动（本机管线 → 仓库 Action） | 自建加速站 / Fastly `max-age=300` | 约 5 分钟后 |
-| blackmatrix7 21 条 | 上游不定期 | jsDelivr `@master` 分支缓存（最长约 12 小时） | 最长约 12 小时后 |
+| blackmatrix7 21 条 | 上游不定期 | 自建加速站 / Fastly `max-age=300` | 约 5 分钟后 |
 
-> 想让第二行也贴近实时：把这 21 条的 `cdn.jsdelivr.net/gh/blackmatrix7/...` 换成自建加速站前缀（`git.521989.xyz/https://raw.githubusercontent.com/...`，实测 5 分钟缓存），代价是每次刷新都从自建加速站回源约 1.7 MB。
+> 24 条规则集统一走自建加速站，缓存都是 5 分钟级。代价是每次刷新都从自建加速站回源约 1.7 MB（`git.521989.xyz` 由本人维护）。
 
 ---
 
 ## ⚠️ 注意事项
 
 > [!WARNING]
-> * **CDN 缓存延迟**：jsDelivr 存在数小时缓存。若刚更新完没有生效，请手动更新配置或临时改用 Raw / 自建加速链接。
+> * **CDN 缓存延迟**：配置本身的 jsDelivr 订阅链接存在数小时缓存（规则集已全部改走自建加速站，不受影响）。若刚推送完没用上，请手动更新配置或临时改用 Raw / 自建加速链接。
 > * **隐私与安全**：本仓库不含任何服务器地址、密码或订阅凭据；若你在自己的 fork 里添加节点，请勿提交明文凭据。
-> * **规则来源**：规则集是远端引用的第三方列表，其可用性取决于上游仓库与 CDN。
+> * **规则来源**：规则集是远端引用的第三方列表，其可用性取决于上游仓库与自建加速站。
 
 ### 免责声明
 
@@ -111,6 +111,7 @@
 ## 📝 更新日志
 
 * **2026-09-25**：结构由 8 段精简为 4 块；规则 71 → 69 条（合并 `101.226.0.0/16` + `101.227.0.0/16`）；修正 5 条被代理列表抢走的死规则；移除 AppleProxy 列表；关闭 MITM。
+* **2026-09-25（二改）**：21 条 blackmatrix7 规则集由 `cdn.jsdelivr.net`（`@master` 分支缓存最长约 12 小时）改为自建加速站 `git.521989.xyz`（上游 `max-age=300`），使 24 条规则集统一为 5 分钟级新鲜度。
 
 ---
 
