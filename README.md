@@ -11,8 +11,8 @@
 
 * **模式**：白名单 —— 兜底走代理（`FINAL, PROXY`）。明确指定中国大陆域名、局域网 IP 与常见国内服务走 `DIRECT`，其余未知流量默认 `PROXY`。
 * **文件**：两份，规则逻辑同源 ——
-  * [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf)：**作者自用版（默认）**。61 条规则、24 条远端规则集，含自建 DoH 与自建加速站。
-  * [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf)：**通用版，任何人可直接用**。57 条规则、21 条远端规则集，换公共 DoH + 公共 CDN jsDelivr。
+  * [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf)：**作者自用版（默认）**。59 条规则、24 条远端规则集，含自建 DoH 与自建加速站。
+  * [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf)：**通用版，任何人可直接用**。55 条规则、21 条远端规则集，换公共 DoH + 公共 CDN jsDelivr。
   两份都是**纯规则、无注释**（说明都收在 [`配置说明.md`](./配置说明.md)）。
 * **规模**：4 个段（`[General]` / `[Rule]` / `[URL Rewrite]` / `[MITM]`）。
 
@@ -154,6 +154,7 @@
 * **2026-09-25（四改）**：新增 **通用版** [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf)（换公共 DoH、20 条规则集改走公共 CDN jsDelivr、摘掉作者自用清单与 `521989.xyz`）及其扫码二维码，并把「哪些是作者个人定制项」写进 [`配置说明.md`](./配置说明.md)。
 * **2026-09-25（五改）**：**清理"伪腾讯信令"IP 段** —— 删除 `100.128.0.0/9`、`172.32.0.0/11`、`172.72.0.0/13`、`172.80.0.0/12`、`172.96.0.0/11`、`172.128.0.0/9`、`204.141.0.0/16`、`30.0.0.0/8`（逐一查证均为境外真实公网段：T-Mobile USA / Microsoft / Akamai / NTT / 美国国防部），并删除冗余的 `push-apple.com.akadns.net`。规则 69 → **60 条**（通用版 65 → 56）；打洞改由端口规则 `DST-PORT,3478` + 两条 UDP 规则承担，境外流量交给 `GEOIP,CN` → `FINAL,PROXY`。
 * **2026-09-25（六改）**：**补齐 Apple 规则集** —— ④ 段新增 `Apple.list`（KEYWORD/UA/IP-CIDR 那一半），与原有的 `Apple_Domain.list`（1560 条域名）配对，格式与 `AdvertisingLite` / `Privacy` 的两半用法一致。规则 60 → **61 条**、规则集 23 → **24**（通用版 57 / 21）。
+* **2026-09-25（七改）**：**证书链 / 探测调整** —— `letsencrypt.org` → `lencr.org`（Let's Encrypt 已停用 OCSP、CRL 迁至 `x1/x2.c.lencr.org`，旧域名实测 `ENOTFOUND`）；删除 `detectportal.firefox.com`（Firefox 专用）与 `connectivitycheck.gstatic.com`（Android / Chrome 探测）。规则 61 → **59 条**（通用版 57 → 55）。
 
 ---
 
