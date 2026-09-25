@@ -22,15 +22,31 @@
 ## 🔗 订阅链接
 
 > [!TIP]
-> **国内网络环境**推荐优先用 **jsDelivr CDN** 或 **自建加速** 链接，连接更稳定。
+> **国内网络环境**推荐优先用 **自建加速** 或 **jsDelivr CDN** 链接，连接更稳定。
 
 * [原始 GitHub Raw 链接](https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/refs/heads/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.conf)
 * [⚡ jsDelivr CDN 加速链接](https://fastly.jsdelivr.net/gh/henrysha1989/shadowrocket-config@main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.conf)
 * [🚀 自建加速链接（国内可用）](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.conf)
 
+### 📱 扫码导入
+
+用 Shadowrocket 的「扫一扫」扫下面的码，可直接添加配置。
+
+**🚀 自建加速（推荐，国内可用）**
+
+<img src="./qr/accelerator.png" width="380" alt="自建加速链接二维码">
+
+**⚡ jsDelivr CDN**
+
+<img src="./qr/jsdelivr.png" width="380" alt="jsDelivr 链接二维码">
+
+> 原始 Raw 链接不单独出码 —— 国内直连不稳定，需要用的时候复制上面的文字链接即可。
+
 ---
 
 ## 📖 使用方法
+
+> 手机和屏幕在同一视线内时，直接用 Shadowrocket 的「扫一扫」扫上面的二维码最快；不在手边就按下面手动添加。
 
 1. 打开 **Shadowrocket** 客户端。
 2. 进入底部导航的 **配置** 页面。
