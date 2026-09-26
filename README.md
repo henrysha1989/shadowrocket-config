@@ -10,10 +10,11 @@
 ## 📄 配置说明
 
 * **模式**：白名单 —— 兜底走代理（`FINAL, PROXY`）。明确指定中国大陆域名、局域网 IP 与常见国内服务走 `DIRECT`，其余未知流量默认 `PROXY`。
-* **文件**：两份，规则逻辑同源 ——
+* **文件**：三份，规则逻辑同源 ——
   * [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf)：**作者自用版（默认）**。59 条规则、24 条远端规则集，含自建 DoH 与自建加速站。
   * [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf)：**通用版，任何人可直接用**。55 条规则、21 条远端规则集，换公共 DoH + 公共 CDN jsDelivr。
-  两份都是**纯规则、无注释**（说明都收在 [`配置说明.md`](./配置说明.md)）。
+  * [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf)：**测试通道**，作者自用。以自用版为基线，只叠加**当前正在验证的改动**（见下面 **🧪 测试版** 一节）。
+  自用版 / 通用版是**纯规则、无注释**；测试版带 **5 行说明头** —— 测试通道里「在测什么」必须跟着文件走，导入后一眼能看见。
 * **规模**：4 个段（`[General]` / `[Rule]` / `[URL Rewrite]` / `[MITM]`）。
 
 **结构**：按「从具体到宽泛」分四块 —— ① 拦截 → ② 精确直连（Apple 系统底层 / 私网设备）→ ③ 代理（海外服务）→ ④ 直连大表 + 微信打洞端口 + `GEOIP,CN` 兜底。每块为什么在那个位置、每条特殊规则的来龙去脉，见 [`配置说明.md`](./配置说明.md)。
@@ -78,6 +79,43 @@
 <img src="./qr/generic-jsdelivr.png" width="380" alt="通用版 · jsDelivr 链接二维码">
 
 > 原始 Raw 链接不单独出码 —— 国内直连不稳定，需要用的时候复制上面的文字链接即可。
+
+---
+
+## 🧪 测试版（正在验证的改动）
+
+> [!NOTE]
+> [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) 是**作者自用的测试通道**：
+> 基线永远跟着**自用版**走，只叠加**当前正在验证的改动**。**订阅链接与二维码固定不变**，内容随实验更新 ——
+> 扫一次码长期有效，随时看到「这一版在测什么」（配置文件开头的 5 行说明头）。
+
+**当前实验 T1（2026-09-26）· DNS 两项**
+
+相对自用版**只改两行**（用 `diff` 核对过，其余一字未动）：
+
+| 参数 | 改动 | 含义 |
+| :--- | :--- | :--- |
+| `dns-fallback-system` | `false → true` | 覆写 DNS 失败或查询超过 2s 时，回退到**系统 DNS**，而不是现在的两个 DoT 服务器（`tls://223.5.5.5`、`tls://1.12.12.12`） |
+| `dns-direct-system` | `false → true` | **直连的域名类规则**改用系统 DNS 解析（走 iOS 解析器的共享缓存、无 HTTPS 往返），不再全部打给自建 DoH |
+
+* 规模不变：**59 条规则 / 24 条规则集**，与自用版一致。
+* 为什么测、生效范围、代价与判读方法：见 [`配置说明.md`](./配置说明.md) 的「🧪 测试版 T1」。
+* ⚠️ `dns-fallback-system` 是**手册未收录的隐式键**（写法沿用作者原配置）；想用有文档、UI 里可见的等价写法，
+  应写成 `fallback-dns-server = system`。
+
+**🚀 自建加速（推荐，国内可用）**
+
+* [自建加速链接](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf)
+
+<img src="./qr/test-accelerator.png" width="380" alt="测试版 · 自建加速链接二维码">
+
+**⚡ jsDelivr CDN**
+
+* [jsDelivr CDN 加速链接](https://fastly.jsdelivr.net/gh/henrysha1989/shadowrocket-config@main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf)
+
+<img src="./qr/test-jsdelivr.png" width="380" alt="测试版 · jsDelivr 链接二维码">
+
+> **↩️ 回退**：重新导入 [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf)（自用版）即可；或把上面两行改回 `false`。
 
 ---
 
@@ -155,6 +193,7 @@
 * **2026-09-25（五改）**：**清理"伪腾讯信令"IP 段** —— 删除 `100.128.0.0/9`、`172.32.0.0/11`、`172.72.0.0/13`、`172.80.0.0/12`、`172.96.0.0/11`、`172.128.0.0/9`、`204.141.0.0/16`、`30.0.0.0/8`（逐一查证均为境外真实公网段：T-Mobile USA / Microsoft / Akamai / NTT / 美国国防部），并删除冗余的 `push-apple.com.akadns.net`。规则 69 → **60 条**（通用版 65 → 56）；打洞改由端口规则 `DST-PORT,3478` + 两条 UDP 规则承担，境外流量交给 `GEOIP,CN` → `FINAL,PROXY`。
 * **2026-09-25（六改）**：**补齐 Apple 规则集** —— ④ 段新增 `Apple.list`（KEYWORD/UA/IP-CIDR 那一半），与原有的 `Apple_Domain.list`（1560 条域名）配对，格式与 `AdvertisingLite` / `Privacy` 的两半用法一致。规则 60 → **61 条**、规则集 23 → **24**（通用版 57 / 21）。
 * **2026-09-25（七改）**：**证书链 / 探测调整** —— `letsencrypt.org` → `lencr.org`（Let's Encrypt 已停用 OCSP、CRL 迁至 `x1/x2.c.lencr.org`，旧域名实测 `ENOTFOUND`）；删除 `detectportal.firefox.com`（Firefox 专用）与 `connectivitycheck.gstatic.com`（Android / Chrome 探测）。规则 61 → **59 条**（通用版 57 → 55）。
+* **2026-09-26（八改）**：新增**测试通道** [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) —— 以自用版为基线 + **T1：`dns-direct-system` / `dns-fallback-system` 两项改 `true`**；配套两张二维码（自建加速 / jsDelivr）。**链接与二维码自此固定**，以后测试内容直接更新这一个文件。动机与判读方法见下面「🧪 测试版」。
 
 ---
 
