@@ -1,5 +1,5 @@
-#!name=AD MitM（假响应解密清单）
-#!desc=被拒后会死循环重试的广告/埋点域，需 MITM 解密才能让假响应策略生效
+#!name=ADMitM
+#!desc=最后更新时间 2026-09-27 04:51:23 · 广告/埋点假响应所需的 MITM 解密清单
 #!author=henrysha1989
 #!repo=https://github.com/henrysha1989/shadowrocket-config
 #!hostname=4
