@@ -1,9 +1,9 @@
 #!name=ADMitM
-#!desc=最后更新时间 2026-09-27 05:15:27 · 广告/埋点假响应所需的 MITM 解密清单
+#!desc=最后更新时间 2026-09-27 05:15:59 · 广告/埋点假响应所需的 MITM 解密清单
 #!author=henrysha1989
 #!repo=https://github.com/henrysha1989/shadowrocket-config
-#!hostname=5
-#!total=5
+#!hostname=6
+#!total=6
 
 # 用途：主配置里对这些域名用了假响应策略（REJECT-ARRAY / REJECT-200 / REJECT-VIDEO 等）。
 #       假响应**必须**配合 HTTPS 解密才生效；不装本模块时，那些规则退化为普通拒绝（安全）。
@@ -27,4 +27,4 @@
 #   *-reading-sign.fqnovelpic.com 番茄/红果广告签名域（p{N} 编号，走 fqnovelpic.com 直连）
 
 [MITM]
-hostname = %APPEND% *reading-ad.qznovelvod.com, mon11-misc-lf.fqnovel.com, *-ad-sign.byteimg.com, i.snssdk.com, *-reading-sign.fqnovelpic.com
+hostname = %APPEND% *reading-ad.qznovelvod.com, mon11-misc-lf.fqnovel.com, *-ad-sign.byteimg.com, i.snssdk.com, *-reading-sign.fqnovelpic.com, *ads-normal*
