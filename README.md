@@ -89,14 +89,29 @@
 > 基线永远跟着**自用版**走，只叠加**当前正在验证的改动**。**订阅链接与二维码固定不变**，内容随实验更新 ——
 > 扫一次码长期有效，随时看到「这一版在测什么」（配置文件开头的 5 行说明头）。
 
-**当前实验 T1（2026-09-26）· DNS 两项**
+**当前实验（2026-09-27）· T1–T6**
 
-相对自用版**只改两行**（用 `diff` 核对过，其余一字未动）：
-
-| 参数 | 改动 | 含义 |
+| 编号 | 改动 | 状态 |
 | :--- | :--- | :--- |
-| `dns-fallback-system` | `false → true` | 覆写 DNS 失败或查询超过 2s 时，回退到**系统 DNS**，而不是现在的两个 DoT 服务器（`tls://223.5.5.5`、`tls://1.12.12.12`） |
-| `dns-direct-system` | `false → true` | **直连的域名类规则**改用系统 DNS 解析（走 iOS 解析器的共享缓存、无 HTTPS 往返），不再全部打给自建 DoH |
+| T1 | `dns-fallback-system = true` | 保留 |
+| T3 | `dns-direct-system` **回退为 `false`** | 实测 `true` 时直连域名解析绕过 ADH（系统 DNS = 192.168.3.1/运营商），失去 DNS 层拦截；已回退 |
+| T2 | `[Rule]` 最前放行 `dig.bdurl.net`、`dns.weixin.qq.com.cn` | ✅ 生效（前者原来 12,186 次 REJECT/7.7h → 4 次 DIRECT） |
+| T5 | 红果 `*reading-ad.qznovelvod.com` 改**假响应** `REJECT-ARRAY` + MITM | ✅ 生效（单分钟 65,430 次 REJECT → 0；不再弹广告） |
+| T6 | `mon11-misc-lf.fqnovel.com` 同样假响应 | 观察中 |
+
+> **假响应为什么需要模块**：`REJECT-ARRAY`（返回 200 + 空 JSON 数组）只有在**该域名被 HTTPS 解密**时才生效。
+> 为避免主机名清单塞进主配置，解密清单放在 **[`ad-mitm.module`](./ad-mitm.module)**，用 `[MITM] %APPEND%` 追加。
+> 详见下面「🧩 可选模块」一节。
+
+<details>
+<summary>T1 的两项分别是什么（点开）</summary>
+
+| 参数 | 含义 |
+| :--- | :--- |
+| `dns-fallback-system` | 覆写 DNS 失败或查询超过 2s 时，回退到**系统 DNS**，而不是两个 DoT 服务器（`tls://223.5.5.5`、`tls://1.12.12.12`） |
+| `dns-direct-system` | **直连的域名类规则**的解析交给谁：`true` = 系统 DNS（快但可能绕过 ADH）；`false` = 走隧道内自建 DoH（ADH 可见） |
+
+</details>
 
 * 规模不变：**59 条规则 / 24 条规则集**，与自用版一致。
 * 为什么测、生效范围、代价与判读方法：见 [`配置说明.md`](./配置说明.md) 的「🧪 测试版 T1」。
@@ -116,6 +131,41 @@
 <img src="./qr/test-jsdelivr.png" width="380" alt="测试版 · jsDelivr 链接二维码">
 
 > **↩️ 回退**：重新导入 [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf)（自用版）即可；或把上面两行改回 `false`。
+
+---
+
+## 🧩 可选模块：`ad-mitm.module`（假响应所需的解密清单）
+
+**什么时候需要它**：某些广告 / 埋点 SDK 在「连接被拒」后会**死循环重试**（实测红果在弹广告时
+单分钟产生 6.5 万次 TCP 重连、约 1,100 次/秒）。对这类域名，单纯 `REJECT` 只会喂大重试风暴；
+正确做法是返回**假响应**（`REJECT-ARRAY` = 200 + 空 JSON 数组、`REJECT-VIDEO` = 空白 MP4 等），
+让 App 认为「请求成功、没有广告」而放弃重试。
+
+> ⚠️ **假响应必须配合 HTTPS 解密**（MITM）才生效；否则退化为普通拒绝。
+
+**订阅方式（一次性）**：小火箭 → **配置 → 模块 → 右上角 `➕` → 填链接 → 下载**
+
+```
+https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/ad-mitm.module
+```
+
+**设计原则**：
+
+* **默认走 reject 规则**——普通广告域直接 `REJECT` 就够了，App 不重试就不用管。
+* **只有「拒绝会引发死循环重试」的域名才进模块**——每个解密域名都吃 Network Extension 内存
+  （iOS 15+ 上限 50 MB）与 CPU，没必要为普通域名付这个成本。
+* 模块里 `hostname = %APPEND% ...` 的 `%APPEND%` **不能删**：不加会覆盖主配置 `[MITM]` 的
+  `hostname`，并影响其他模块。
+* 多数模块**仅在「全局路由 = 配置」时生效**。
+
+**以后新增域名**：只改 `ad-mitm.module` 这一个文件的 `hostname` 行（三份主配置都不用动）。
+
+**已知清单**（截至 2026-09-27）：
+
+| 域名 | 用途 | 现象 |
+| :--- | :--- | :--- |
+| `*reading-ad.qznovelvod.com` | 红果短剧广告 | 被拒后单分钟 65,430 次重连 |
+| `mon11-misc-lf.fqnovel.com` | 番茄小说（同厂）监控上报 | 被拒后持续 ~109 次/分 |
 
 ---
 
