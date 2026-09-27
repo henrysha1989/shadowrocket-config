@@ -1,14 +1,27 @@
-# Shadowrocket 模块：广告/埋点域名「假响应」解密清单
-# 用途：主配置里用 REJECT-ARRAY / REJECT-VIDEO 等假响应策略时，**必须**把这些主机名交给 MITM 解密，
-#       否则假响应不生效（退化为普通拒绝，App 会持续重试）。
+#!name=AD MitM（假响应解密清单）
+#!desc=被拒后会死循环重试的广告/埋点域，需 MITM 解密才能让假响应策略生效
+#!author=henrysha1989
+#!repo=https://github.com/henrysha1989/shadowrocket-config
+#!hostname=2
+#!total=2
+
+# 用途：主配置里对这些域名用了假响应策略（REJECT-ARRAY / REJECT-200 / REJECT-VIDEO 等）。
+#       假响应**必须**配合 HTTPS 解密才生效；不装本模块时，那些规则退化为普通拒绝（安全）。
 #
-# 订阅方式：小火箭 → 配置 → 模块 → 右上角 ➕ → 填下面的链接 → 下载
+# 订阅：小火箭 → 配置 → 模块 → 右上角 ➕ → 填
 #   https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/ad-mitm.module
 #
-# 以后新增广告/埋点域，**只改这一个文件的 hostname 行**即可（不用动三份主配置）。
-# ⚠️ 必须用 %APPEND%：不加会覆盖主配置 [MITM] 里已有的 hostname，并影响其他模块。
-# ⚠️ 需在使用的配置 ⓘ 里开启 HTTPS 解密；模块规则优先级高于配置。
+# 维护：以后新增域名**只改本文件的 hostname 行**，三份主配置都不用动。
+# 原则：默认走 reject 规则；只有「拒绝会引发死循环重试」的域名才进这里
+#       （每个解密域名都吃 NE 内存，iOS 15+ 上限 50MB）。
+#
+# ⚠️ hostname 行必须带 %APPEND%：不加会覆盖主配置 [MITM] 的 hostname，并影响其他模块。
+# ⚠️ 需在使用的配置 ⓘ 里开启 HTTPS 解密。
 # ⚠️ 多数模块仅在「全局路由 = 配置」时生效。
+#
+# 已知清单：
+#   *reading-ad.qznovelvod.com   红果短剧广告：被拒后单分钟 65,430 次重连（实测 2026-09-27）
+#   mon11-misc-lf.fqnovel.com    番茄小说（同厂）监控上报：被拒后持续 ~109 次/分
 
 [MITM]
 hostname = %APPEND% *reading-ad.qznovelvod.com, mon11-misc-lf.fqnovel.com
