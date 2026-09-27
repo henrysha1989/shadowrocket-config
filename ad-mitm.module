@@ -1,9 +1,9 @@
 #!name=ADMitM
-#!desc=最后更新时间 2026-09-27 05:15:59 · 广告/埋点假响应所需的 MITM 解密清单
+#!desc=最后更新时间 2026-09-27 05:52:44 · 广告/埋点假响应所需的 MITM 解密清单
 #!author=henrysha1989
 #!repo=https://github.com/henrysha1989/shadowrocket-config
-#!hostname=6
-#!total=6
+#!hostname=7
+#!total=7
 
 # 用途：主配置里对这些域名用了假响应策略（REJECT-ARRAY / REJECT-200 / REJECT-VIDEO 等）。
 #       假响应**必须**配合 HTTPS 解密才生效；不装本模块时，那些规则退化为普通拒绝（安全）。
@@ -19,6 +19,7 @@
 # ⚠️ 需在使用的配置 ⓘ 里开启 HTTPS 解密。
 # ⚠️ 多数模块仅在「全局路由 = 配置」时生效。
 #
+# ⚠️ 2026-09-27 实验：清单改为**精确域名**（原先用通配，疑似 MITM hostname 不认通配导致假响应不生效）
 # 已知清单：
 #   *reading-ad.qznovelvod.com   红果短剧广告：被拒后单分钟 65,430 次重连（实测 2026-09-27）
 #   mon11-misc-lf.fqnovel.com    番茄小说（同厂）监控上报：被拒后持续 ~109 次/分
@@ -27,4 +28,4 @@
 #   *-reading-sign.fqnovelpic.com 番茄/红果广告签名域（p{N} 编号，走 fqnovelpic.com 直连）
 
 [MITM]
-hostname = %APPEND% *reading-ad.qznovelvod.com, mon11-misc-lf.fqnovel.com, *-ad-sign.byteimg.com, i.snssdk.com, *-reading-sign.fqnovelpic.com, *ads-normal*
+hostname = %APPEND% v9-reading-ad.qznovelvod.com, v5-bd-daily-reading-ad.qznovelvod.com, mon11-misc-lf.fqnovel.com, p3-ad-sign.byteimg.com, i.snssdk.com, p3-reading-sign.fqnovelpic.com, ads3-normal-lf.zijieapi.com
