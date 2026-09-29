@@ -16,7 +16,7 @@
   * [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf)：**测试通道**，作者自用。以自用版为基线，只叠加**当前正在验证的改动**（见下面 **🧪 测试版** 一节）。
   自用版 / 通用版是**纯规则、无注释**；测试版带 **5 行说明头** —— 测试通道里「在测什么」必须跟着文件走，导入后一眼能看见。
   「N 条内联规则」= `[Rule]` 段里直接写死在文件里的规则行；「N 条远端规则集」= `RULE-SET` / `DOMAIN-SET` 引用的远端列表。
-* **规模**：自用版 4 个段（`[General]` / `[Rule]` / `[URL Rewrite]` / `[MITM]`）；通用版 3 个段（**无 `[MITM]`**，它不带假响应）。
+* **规模**：两份都是 4 个段（`[General]` / `[Rule]` / `[URL Rewrite]` / `[MITM]`）。
 
 **结构**：按「从具体到宽泛」分块 —— 精确直连（镜像站 / 局域网设备；自用版另含 iOS 系统底层与证书链）→ 拦截 → 代理 → 直连大表（`Apple` / `China_Domain` / `ChinaMedia` / `Download`）→ `GEOIP,CN` → `FINAL,PROXY`。两份的差别：**自用版把拦截放在第 1 位**、系统与证书链直连段完整保留（43 条内联）；**通用版把 Apple 两半提到拦截与代理之前**（= Apple 全直连、无 `AppleProxy`），并**删掉了整个系统/证书直连段**（只剩 3 条内联）。每块为什么在那个位置，见 [`配置说明.md`](./配置说明.md)。
 
@@ -288,6 +288,8 @@ https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrock
   * 前 4 条**删了不影响**：iOS 的 NTP / APNs 主机都是 `*.apple.com`，已被前移的 `Apple_Domain` 覆盖，照样直连。
   * **唯一实际损失**：那 5 家第三方 CA 的 OCSP/CRL 查询改走代理（TLS 握手多一次往返；代理异常时可能让证书校验软失败）。要找回只需加回 5 行 `DOMAIN-SUFFIX,<ca>,DIRECT`。
   * 结果：内联规则 12 → **3 条**（只剩 `521989.xyz` 放行 + `GEOIP,CN` + `FINAL,PROXY`），文件 63 → **52 行**，规则集仍 19 条。
+* **2026-09-29（十二改）**：**通用版补回 `[MITM]` 段**，`hostname` 补全为 `google.cn, *.google.cn, g.cn, *.g.cn`（覆盖 `[URL Rewrite]` 那两条正则能匹配的全部主机），与自用版**逐字节一致**。⚠️ `enable = false` 未改 —— 要让 HTTPS 的 `www.google.cn` / `google.cn/search` 也被改写，必须自己改成 `true` 并安装信任 CA 证书；只加 host 列表**不会**改变现有行为。
+  * 另：`skip-proxy` 14 → **6 条**、`tun-excluded-routes` 14 → **8 条**（去掉规则集已覆盖的域名与永不路由的 TEST-NET / 废弃 6to4 段 / 与 `ipv6 = false` 矛盾的 `ff02::fb/128`）。
 
 ---
 
