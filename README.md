@@ -14,11 +14,11 @@
 | 文件 | 面向 | 内联 / 规则集 | 订阅链接（自建加速，国内可用） |
 | :--- | :--- | :--- | :--- |
 | [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf) | **作者自用（默认）** | 27 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.conf) |
-| [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | 只要公开上游规则集的人 | 3 / 19 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) |
+| [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | 只要公开上游规则集的人（另挂 1 张自建红果专表） | 3 / 20 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) |
 | [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) | 作者自用（测试通道） | 27 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf) |
 
 * **自用版**含 3 条自建清单（`reject-custom` / `proxy-custom` / `direct-custom`，由本机 AdGuard Home 管线维护）。
-* **通用版**只装公开上游规则集，且 Apple 两半排在拦截之前（Apple 全直连）。
+* **通用版**不装自建清单，但挂了一张**红果/番茄广告专表** [`hongguo-ad.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/hongguo-ad.list)（26 条，`REJECT-DROP`）；Apple 两半排在拦截之前（Apple 全直连）。
 * **测试版** = 自用版 + 1 处改动（`dns-server` 换成自建 DoH），在测「ADH 对手机 DNS 的可见性」。⚠️ 依赖自建 DoH，**别人导入会断网**。
 
 每段为什么这么写、每个实验的来龙去脉与变更历史：见 [`配置说明.md`](./配置说明.md)。
