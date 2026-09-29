@@ -11,29 +11,33 @@
 
 * **模式**：白名单 —— 兜底走代理（`FINAL, PROXY`）。明确指定中国大陆域名、局域网 IP 与常见国内服务走 `DIRECT`，其余未知流量默认 `PROXY`。
 * **文件**：三份，规则逻辑同源 ——
-  * [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf)：**作者自用版（默认）**。59 条规则、24 条远端规则集，含自建 DoH 与自建加速站。
-  * [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf)：**通用版，任何人可直接用**。55 条规则、21 条远端规则集，换公共 DoH + 公共 CDN jsDelivr。
+  * [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf)：**作者自用版（默认）**。43 条内联规则、24 条远端规则集，含自建 DoH 与自建加速站。
+  * [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf)：**通用版**。25 条内联规则、20 条远端规则集；公共 DNS（阿里 / 腾讯 DoT）+ 自建加速站镜像。
   * [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf)：**测试通道**，作者自用。以自用版为基线，只叠加**当前正在验证的改动**（见下面 **🧪 测试版** 一节）。
   自用版 / 通用版是**纯规则、无注释**；测试版带 **5 行说明头** —— 测试通道里「在测什么」必须跟着文件走，导入后一眼能看见。
-* **规模**：4 个段（`[General]` / `[Rule]` / `[URL Rewrite]` / `[MITM]`）。
+  「N 条内联规则」= `[Rule]` 段里直接写死在文件里的规则行；「N 条远端规则集」= `RULE-SET` / `DOMAIN-SET` 引用的远端列表。
+* **规模**：自用版 4 个段（`[General]` / `[Rule]` / `[URL Rewrite]` / `[MITM]`）；通用版 3 个段（**无 `[MITM]`**，它不带假响应）。
 
-**结构**：按「从具体到宽泛」分四块 —— ① 拦截 → ② 精确直连（Apple 系统底层 / 私网设备）→ ③ 代理（海外服务）→ ④ 直连大表 + 微信打洞端口 + `GEOIP,CN` 兜底。每块为什么在那个位置、每条特殊规则的来龙去脉，见 [`配置说明.md`](./配置说明.md)。
+**结构**：按「从具体到宽泛」分块 —— ① 精确直连（镜像站 / 局域网设备 / Apple 系统底层与证书链）→ ② 拦截 → ③ 代理（**`AppleProxy` 例外必须排在直连大表之前**，否则永不生效）→ ④ 直连大表（`Apple` / `China_Domain` / `ChinaMedia` / `Download`）→ `GEOIP,CN` → `FINAL,PROXY`。每块为什么在那个位置、每条特殊规则的来龙去脉，见 [`配置说明.md`](./配置说明.md)。
 
-规则集：**21 条**来自 [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)（`Apple`（域名 + 规则两半）/ `ChinaMedia` / `GlobalMedia` / `AdvertisingLite` / `Privacy` 等）；自用版另有 **3 条**自用列表（通用版没有）。自用版经**自建加速站** `git.521989.xyz` 拉取，通用版经**公共 CDN jsDelivr** 拉取（不依赖作者任何服务）。
+规则集全部来自 [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)（`Apple`（域名 + 规则两半）/ `ChinaMedia` / `GlobalMedia` / `AdvertisingLite` / `Privacy` / `AppleProxy` 等）—— **通用版 20 条、自用版 21 条**；自用版另有 **3 条**自用列表（`*-custom.list`，通用版没有）。**两份配置的公共规则集都经自建加速站 `git.521989.xyz` 拉取**。
+
+> [!IMPORTANT]
+> **通用版不再"完全不依赖作者服务"**：自 **2026-09-29** 起，两份配置的公共规则集**都经自建加速站 `git.521989.xyz` 拉取**（此前通用版走公共 CDN jsDelivr）。如果你的网络访问不了该加速站，20 条规则集会全部拉取失败、整份退化成 `FINAL,PROXY`；此时把规则集前缀换成自备镜像即可（形如 `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/...`）。
 
 > [!NOTE]
-> **该选哪份？** 只想拿来自己用、不想碰作者的基础设施 → 选 **通用版**；想复刻作者这套（含自建 DoH / 加速站 / 自用清单）→ 看 **自用版**。两份的逐条差异见 [`配置说明.md` 的「🆚 自用版 vs 通用版」](./配置说明.md#-自用版-vs-通用版)。
+> **该选哪份？** 想复刻作者整套（自建 DoH / 自用清单 / 假响应）→ 看 **自用版**；只想要公开上游规则集、不要作者的自用清单（`*-custom.list`）→ 选 **通用版**。两份的逐条差异见 [`配置说明.md` 的「🆚 自用版 vs 通用版」](./配置说明.md#-自用版-vs-通用版)。
 
 ---
 
 ## 🧩 两个版本怎么选
 
-| 文件 | 适合谁 | 依赖 | 规则集来源 |
+| 文件 | 适合谁 | 规则集来源 | 远端加载量 |
 | :--- | :--- | :--- | :--- |
-| `shadowrocket-白名单.conf` | 作者本人 / 想复刻整套的人 | 作者的自建 DoH + 自建加速站 | 23 条（20 公开 + 3 作者自用） |
-| `shadowrocket-白名单.通用版.conf` | **任何人** | 无 | 20 条（全部公开上游） |
+| `shadowrocket-白名单.conf` | 作者本人 / 想复刻整套的人 | 自建加速站 · 24 条（21 公开 + 3 作者自用） | 约 **8.75 万** 条 |
+| `shadowrocket-白名单.通用版.conf` | 只要公开上游规则集的人 | 自建加速站 · 20 条（全部公开上游） | 约 **0.94 万** 条 |
 
-通用版唯一的取舍：规则集走 jsDelivr，`@master` 缓存最长约 12 小时（自用版的加速站是 5 分钟级）。要更快的新鲜度，把规则集前缀换成自备加速站即可。
+通用版的取舍：**不装两张最大的广告域名表**（`AdvertisingLite_Domain` 37,692 + `Privacy_Domain` 39,916），只保留轻量拦截（`BlockHttpDNS` + `AdvertisingLite.list` + `Privacy.list`，合计 469 条）。换来的是远端加载量 8.75 万 → 0.94 万、编译与更新开销大幅下降；代价是拦截覆盖面变小（广告拦截不再由大表兜底）。**分流判定不受影响** —— 这两张表只做 `REJECT`，不参与直连/代理判定。
 
 ---
 
@@ -48,7 +52,7 @@
 * [⚡ jsDelivr CDN 加速链接](https://fastly.jsdelivr.net/gh/henrysha1989/shadowrocket-config@main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.conf)
 * [🚀 自建加速链接（国内可用）](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.conf)
 
-### 通用版（推荐给别人用）
+### 通用版（公开上游规则集）
 
 * [原始 GitHub Raw 链接](https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/refs/heads/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf)
 * [⚡ jsDelivr CDN 加速链接](https://fastly.jsdelivr.net/gh/henrysha1989/shadowrocket-config@main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf)
@@ -68,7 +72,7 @@
 
 <img src="./qr/jsdelivr.png" width="380" alt="自用版 · jsDelivr 链接二维码">
 
-#### 通用版（推荐给别人用）
+#### 通用版（公开上游规则集）
 
 **🚀 自建加速（推荐，国内可用）**
 
@@ -113,7 +117,7 @@
 
 </details>
 
-* 规模不变：**59 条规则 / 24 条规则集**，与自用版一致。
+* 规模不变：**43 条内联规则 / 24 条规则集**，与自用版一致。
 * 为什么测、生效范围、代价与判读方法：见 [`配置说明.md`](./配置说明.md) 的「🧪 测试版 T1」。
 * ⚠️ `dns-fallback-system` 是**手册未收录的隐式键**（写法沿用作者原配置）；想用有文档、UI 里可见的等价写法，
   应写成 `fallback-dns-server = system`。
@@ -205,7 +209,7 @@ https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrock
 
 ### 🔄 更新远程规则集
 
-配置里的规则集（自用版 24 条 = blackmatrix7 21 条 + 自用 3 条；通用版 21 条）都是**远端引用**，不是快照。Shadowrocket 会把它们缓存起来，需要主动触发才会重新下载。
+配置里的规则集（自用版 24 条 = blackmatrix7 21 条 + 自用 3 条；通用版 20 条，全部 blackmatrix7）都是**远端引用**，不是快照。Shadowrocket 会把它们缓存起来，需要主动触发才会重新下载。
 
 **手动**
 
@@ -238,18 +242,18 @@ https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrock
 | 规则集 | 上游更新 | 中间缓存 | 手机上最快可见 |
 | :--- | :--- | :--- | :--- |
 | 自用 3 条（`*-custom.list`，仅自用版） | 每 4 小时自动（本机管线 → 仓库 Action） | 自建加速站 / Fastly `max-age=300` | 约 5 分钟后 |
-| blackmatrix7 21 条 | 上游不定期 | 自用版：自建加速站 / 通用版：raw 官方 | 约 5 分钟后 |
+| blackmatrix7 20/21 条 | 上游不定期 | **两版都是自建加速站**（Fastly `max-age=300`） | 约 5 分钟后 |
 
-> 自用版 24 条规则集统一走自建加速站，缓存都是 5 分钟级。代价是每次刷新都从自建加速站回源约 1.6 MB（`git.521989.xyz` 由本人维护）；通用版走公共 CDN jsDelivr（`@master` 缓存最长约 12 小时）。
+> 自用版 24 条规则集统一走自建加速站，通用版 20 条同样走自建加速站，两版缓存都是 5 分钟级。代价是每次刷新都要从自建加速站回源（自用版约 1.6 MB、通用版约 0.15 MB；`git.521989.xyz` 由本人维护）。**通用版不再走公共 CDN jsDelivr。**
 
 ---
 
 ## ⚠️ 注意事项
 
 > [!WARNING]
-> * **CDN 缓存延迟**：配置本身的 jsDelivr 订阅链接存在数小时缓存（自用版的规则集已全部改走自建加速站，不受影响）。若刚推送完没用上，请手动更新配置或临时改用 Raw / 自建加速链接。
+> * **CDN 缓存延迟**：配置**文件本身**的 jsDelivr 订阅链接存在数小时缓存（两版的**规则集**都已改走自建加速站，不受影响）。若刚推送完没用上，请手动更新配置或临时改用 Raw / 自建加速链接。
 > * **隐私与安全**：本仓库不含任何服务器地址、密码或订阅凭据；若你在自己的 fork 里添加节点，请勿提交明文凭据。
-> * **规则来源**：规则集是远端引用的第三方列表，其可用性取决于上游仓库；自用版还额外依赖作者的自建加速站。
+> * **规则来源**：规则集是远端引用的第三方列表，其可用性取决于上游仓库；**两版都依赖作者的自建加速站 `git.521989.xyz`** 作为镜像。
 
 ### 免责声明
 
@@ -268,6 +272,12 @@ https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrock
 * **2026-09-25（六改）**：**补齐 Apple 规则集** —— ④ 段新增 `Apple.list`（KEYWORD/UA/IP-CIDR 那一半），与原有的 `Apple_Domain.list`（1560 条域名）配对，格式与 `AdvertisingLite` / `Privacy` 的两半用法一致。规则 60 → **61 条**、规则集 23 → **24**（通用版 57 / 21）。
 * **2026-09-25（七改）**：**证书链 / 探测调整** —— `letsencrypt.org` → `lencr.org`（Let's Encrypt 已停用 OCSP、CRL 迁至 `x1/x2.c.lencr.org`，旧域名实测 `ENOTFOUND`）；删除 `detectportal.firefox.com`（Firefox 专用）与 `connectivitycheck.gstatic.com`（Android / Chrome 探测）。规则 61 → **59 条**（通用版 57 → 55）。
 * **2026-09-26（八改）**：新增**测试通道** [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) —— 以自用版为基线 + **T1：`dns-direct-system` / `dns-fallback-system` 两项改 `true`**；配套两张二维码（自建加速 / jsDelivr）。**链接与二维码自此固定**，以后测试内容直接更新这一个文件。动机与判读方法见下面「🧪 测试版」。
+* **2026-09-29（九改）**：**通用版瘦身**，并统一镜像 ——
+  * 去掉两张最大的广告域名表 `AdvertisingLite_Domain`（37,692）+ `Privacy_Domain`（39,916）；保留 `BlockHttpDNS` / `AdvertisingLite.list` / `Privacy.list` 三条轻量拦截。远端加载量 **8.75 万 → 0.94 万**。
+  * 规则集镜像由公共 CDN jsDelivr **改回自建加速站** `git.521989.xyz`（作者决定以自用为准），因此**通用版不再是"完全不依赖作者服务"**，见上面 `IMPORTANT` 提示。
+  * 补回**系统 / 时间 / 证书直连段**（`DST-PORT,123`、`DST-PORT,5223`、`IP-CIDR,17.0.0.0/8`、`push.apple.com`、OCSP / CRL、digicert 链等）与 `Apple.list`；新增 `AppleProxy` 列表并**排在直连大表之前**（原来排在 `Apple_Domain` 之后，44 条永不生效）。
+  * 去掉 `[MITM]` 段（原为 `enable = false`，无功能影响）。文件 93 → **76 行**、规则集 21 → **20 条**。
+  * README 里的规则计数口径统一为「`[Rule]` 段内联规则行 / 远端规则集数」，并据此修正了自用版的旧数字（59 → **43**）。
 
 ---
 
