@@ -12,13 +12,13 @@
 * **模式**：白名单 —— 兜底走代理（`FINAL, PROXY`）。明确指定中国大陆域名、局域网 IP 与常见国内服务走 `DIRECT`，其余未知流量默认 `PROXY`。
 * **文件**：三份，规则逻辑同源 ——
   * [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf)：**作者自用版（默认）**。43 条内联规则、24 条远端规则集，含自建 DoH 与自建加速站。
-  * [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf)：**通用版**。12 条内联规则、19 条远端规则集；公共 DNS（阿里 / 腾讯 DoT）+ 自建加速站镜像；**Apple 全直连**（无 `AppleProxy`）。
+  * [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf)：**通用版**。3 条内联规则、19 条远端规则集；公共 DNS（阿里 / 腾讯 DoT）+ 自建加速站镜像；**Apple 全直连**（无 `AppleProxy`）；**无系统/证书直连段**。
   * [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf)：**测试通道**，作者自用。以自用版为基线，只叠加**当前正在验证的改动**（见下面 **🧪 测试版** 一节）。
   自用版 / 通用版是**纯规则、无注释**；测试版带 **5 行说明头** —— 测试通道里「在测什么」必须跟着文件走，导入后一眼能看见。
   「N 条内联规则」= `[Rule]` 段里直接写死在文件里的规则行；「N 条远端规则集」= `RULE-SET` / `DOMAIN-SET` 引用的远端列表。
 * **规模**：自用版 4 个段（`[General]` / `[Rule]` / `[URL Rewrite]` / `[MITM]`）；通用版 3 个段（**无 `[MITM]`**，它不带假响应）。
 
-**结构**：按「从具体到宽泛」分块 —— 精确直连（镜像站 / 局域网设备 / iOS 系统底层与证书链）→ 拦截 → 代理 → 直连大表（`Apple` / `China_Domain` / `ChinaMedia` / `Download`）→ `GEOIP,CN` → `FINAL,PROXY`。两份的顺序差别：**自用版把拦截放在第 1 位**；**通用版把 Apple 两半提到拦截与代理之前**（= Apple 全直连、无 `AppleProxy`）。每块为什么在那个位置、每条特殊规则的来龙去脉，见 [`配置说明.md`](./配置说明.md)。
+**结构**：按「从具体到宽泛」分块 —— 精确直连（镜像站 / 局域网设备；自用版另含 iOS 系统底层与证书链）→ 拦截 → 代理 → 直连大表（`Apple` / `China_Domain` / `ChinaMedia` / `Download`）→ `GEOIP,CN` → `FINAL,PROXY`。两份的差别：**自用版把拦截放在第 1 位**、系统与证书链直连段完整保留（43 条内联）；**通用版把 Apple 两半提到拦截与代理之前**（= Apple 全直连、无 `AppleProxy`），并**删掉了整个系统/证书直连段**（只剩 3 条内联）。每块为什么在那个位置，见 [`配置说明.md`](./配置说明.md)。
 
 规则集全部来自 [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)（`Apple`（域名 + 规则两半）/ `ChinaMedia` / `GlobalMedia` / `AdvertisingLite` / `Privacy` 等）—— **通用版 19 条、自用版 21 条**；自用版另有 **3 条**自用列表（`*-custom.list`，通用版没有）。**两份配置的公共规则集都经自建加速站 `git.521989.xyz` 拉取**。
 
@@ -283,6 +283,11 @@ https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrock
   * 删掉 13 条与 `Apple_Domain` / `China_Domain` 重复的内联规则（`ocsp.apple.com`、`updates*.cdn-apple.com`、`digicert.com`、`push.apple.com` 等）；它们原先还在挡 `AppleProxy`，现在不需要了。内联规则 25 → **12 条**、规则集 20 → **19 条**、文件 76 → **63 行**。
   * 保留 6 条无表覆盖的内联域名（`pool.ntp.org` + 5 家第三方 CA 吊销）与 3 条端口/网段（`DST-PORT,123` / `DST-PORT,5223` / `IP-CIDR,17.0.0.0/8`）。
   * ⚠️ 副作用（已实测，仅 1 条）：Apple 表里的 `.crashlytics.com` 同时也在拦截表里，Apple 前移后它由 REJECT 变成 DIRECT。
+* **2026-09-29（十一改）**：**通用版删掉整个系统/证书直连段** ——
+  * 删掉 `DST-PORT,123`（NTP）、`DST-PORT,5223`（APNs）、`IP-CIDR,17.0.0.0/8`、`pool.ntp.org`，以及 `digicert.cn` / `entrust.net` / `lencr.org` / `identrust.com` / `sectigo.com` 五家第三方 CA 吊销域名。
+  * 前 4 条**删了不影响**：iOS 的 NTP / APNs 主机都是 `*.apple.com`，已被前移的 `Apple_Domain` 覆盖，照样直连。
+  * **唯一实际损失**：那 5 家第三方 CA 的 OCSP/CRL 查询改走代理（TLS 握手多一次往返；代理异常时可能让证书校验软失败）。要找回只需加回 5 行 `DOMAIN-SUFFIX,<ca>,DIRECT`。
+  * 结果：内联规则 12 → **3 条**（只剩 `521989.xyz` 放行 + `GEOIP,CN` + `FINAL,PROXY`），文件 63 → **52 行**，规则集仍 19 条。
 
 ---
 
