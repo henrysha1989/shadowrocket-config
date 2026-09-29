@@ -11,7 +11,7 @@
 
 * **模式**：白名单 —— 兜底走代理（`FINAL, PROXY`）。明确指定中国大陆域名、局域网 IP 与常见国内服务走 `DIRECT`，其余未知流量默认 `PROXY`。
 * **文件**：三份，规则逻辑同源 ——
-  * [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf)：**作者自用版（默认）**。30 条内联规则、24 条远端规则集（含 3 条自建清单），含自建 DoH 与自建加速站。
+  * [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf)：**作者自用版（默认）**。27 条内联规则、22 条远端规则集（含 3 条自建清单），含自建 DoH 与自建加速站。
   * [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf)：**通用版**。3 条内联规则、19 条远端规则集；公共 DNS（阿里 / 腾讯 DoT）+ 自建加速站镜像；**Apple 全直连**（无 `AppleProxy`）；**无系统/证书直连段**。
   * [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf)：**测试通道**，作者自用。以自用版为基线，只叠加**当前正在验证的改动**（见下面 **🧪 测试版** 一节）。
   **自用版带 14 行说明头**（设计要点 1–5），导入后一眼能看见；**通用版是纯规则、无注释**。
@@ -19,9 +19,9 @@
   「N 条内联规则」= `[Rule]` 段里直接写死在文件里的规则行；「N 条远端规则集」= `RULE-SET` / `DOMAIN-SET` 引用的远端列表。
 * **规模**：两份都是 4 个段（`[General]` / `[Rule]` / `[URL Rewrite]` / `[MITM]`）。
 
-**结构**：按「从具体到宽泛」分块 —— 精确直连（镜像站 / 局域网设备；自用版另含 iOS 系统底层与证书链）→ 拦截 → 代理 → 直连大表（`Apple` / `China_Domain` / `ChinaMedia` / `Download`）→ `GEOIP,CN` → `FINAL,PROXY`。两份的差别：**自用版把拦截放在第 1 位**、系统与证书链直连段保留 9 行（共 30 条内联）；**通用版把 Apple 两半提到拦截与代理之前**（= Apple 全直连、无 `AppleProxy`），并**删掉了整个系统/证书直连段**（只剩 3 条内联）。每块为什么在那个位置，见 [`配置说明.md`](./配置说明.md)。
+**结构**：按「从具体到宽泛」分块 —— 精确直连（镜像站 / 局域网设备；自用版另含 iOS 系统底层与证书链）→ 拦截 → 代理 → 直连大表（`Apple` / `China_Domain` / `ChinaMedia` / `Download`）→ `GEOIP,CN` → `FINAL,PROXY`。两份的差别：**自用版把拦截放在第 1 位**、系统与证书链直连段保留 9 行（共 27 条内联）；**通用版把 Apple 两半提到拦截与代理之前**（= Apple 全直连、无 `AppleProxy`），并**删掉了整个系统/证书直连段**（只剩 3 条内联）。每块为什么在那个位置，见 [`配置说明.md`](./配置说明.md)。
 
-规则集全部来自 [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)（`Apple`（域名 + 规则两半）/ `ChinaMedia` / `GlobalMedia` / `AdvertisingLite` / `Privacy` 等）—— **通用版 19 条、自用版 21 条**；自用版另有 **3 条**自用列表（`*-custom.list`，通用版没有）。**两份配置的公共规则集都经自建加速站 `git.521989.xyz` 拉取**。
+规则集全部来自 [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)（`Apple`（域名 + 规则两半）/ `ChinaMedia` / `GlobalMedia` / `AdvertisingLite` / `Privacy` 等）—— **两份各 19 条**；自用版另有 **3 条**自建列表（`*-custom.list`，通用版没有）。**两份配置的公共规则集都经自建加速站 `git.521989.xyz` 拉取**。
 
 > [!IMPORTANT]
 > **通用版不再"完全不依赖作者服务"**：自 **2026-09-29** 起，两份配置的公共规则集**都经自建加速站 `git.521989.xyz` 拉取**（此前通用版走公共 CDN jsDelivr）。如果你的网络访问不了该加速站，19 条规则集会全部拉取失败、整份退化成 `FINAL,PROXY`；此时把规则集前缀换成自备镜像即可（形如 `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/...`）。
@@ -35,10 +35,10 @@
 
 | 文件 | 适合谁 | 规则集来源 | 远端加载量 |
 | :--- | :--- | :--- | :--- |
-| `shadowrocket-白名单.conf` | 作者本人 / 想复刻整套的人 | 自建加速站 · 24 条（21 公开 + 3 作者自用） | 约 **8.75 万** 条 |
+| `shadowrocket-白名单.conf` | 作者本人 / 想复刻整套的人 | 自建加速站 · 22 条（19 公开 + 3 作者自用） | 约 **0.99 万** 条 |
 | `shadowrocket-白名单.通用版.conf` | 只要公开上游规则集的人 | 自建加速站 · 19 条（全部公开上游） | 约 **0.93 万** 条 |
 
-通用版的取舍：**不装两张最大的广告域名表**（`AdvertisingLite_Domain` 37,692 + `Privacy_Domain` 39,916），只保留轻量拦截（`BlockHttpDNS` + `AdvertisingLite.list` + `Privacy.list`，合计 469 条）；**不用 `AppleProxy`**，并把 Apple 两半提到拦截之前 ⇒ **所有 Apple 流量走直连**。换来的是远端加载量 8.75 万 → 0.93 万、编译与更新开销大幅下降；代价是拦截覆盖面变小（广告拦截不再由大表兜底）。**分流判定不受影响** —— 去掉的是一张 `REJECT` 大表和一张 Apple 例外表，不是直连/代理判据。
+**两份现在都不装那两张最大的广告域名表**（`AdvertisingLite_Domain` 37,692 + `Privacy_Domain` 39,916；通用版 09-29 先删，自用版同日 B 组跟进）。拦截只保留轻量集合：通用版 `BlockHttpDNS` + `AdvertisingLite.list` + `Privacy.list`（469 条），自用版另加自建的 `reject-custom.list`。通用版另有两点不同：**不用 `AppleProxy`**，并把 Apple 两半提到拦截之前 ⇒ **所有 Apple 流量走直连**。换来的是两份的远端加载量都降到 1 万条以内、编译与更新开销大幅下降；代价是拦截覆盖面变小 —— ⚠️ 但**不等于拦截失效**：自用版实测 45% 的 REJECT 事件来自**内联关键字规则**（`reading-ad` 一条就占 266,360 次），不受删表影响。**分流判定完全不受影响** —— 去掉的是 `REJECT` 域名表与一张 Apple 例外表，不是直连/代理判据。
 
 ---
 
@@ -210,7 +210,7 @@ https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrock
 
 ### 🔄 更新远程规则集
 
-配置里的规则集（自用版 24 条 = blackmatrix7 21 条 + 自用 3 条；通用版 19 条，全部 blackmatrix7）都是**远端引用**，不是快照。Shadowrocket 会把它们缓存起来，需要主动触发才会重新下载。
+配置里的规则集（自用版 22 条 = blackmatrix7 19 条 + 自用 3 条；通用版 19 条，全部 blackmatrix7）都是**远端引用**，不是快照。Shadowrocket 会把它们缓存起来，需要主动触发才会重新下载。
 
 **手动**
 
@@ -243,9 +243,9 @@ https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrock
 | 规则集 | 上游更新 | 中间缓存 | 手机上最快可见 |
 | :--- | :--- | :--- | :--- |
 | 自用 3 条（`*-custom.list`，仅自用版） | 每 4 小时自动（本机管线 → 仓库 Action） | 自建加速站 / Fastly `max-age=300` | 约 5 分钟后 |
-| blackmatrix7 19/21 条 | 上游不定期 | **两版都是自建加速站**（Fastly `max-age=300`） | 约 5 分钟后 |
+| blackmatrix7 19/19 条 | 上游不定期 | **两版都是自建加速站**（Fastly `max-age=300`） | 约 5 分钟后 |
 
-> 自用版 24 条规则集统一走自建加速站，通用版 19 条同样走自建加速站，两版缓存都是 5 分钟级。代价是每次刷新都要从自建加速站回源（自用版约 1.6 MB、通用版约 0.13 MB；`git.521989.xyz` 由本人维护）。**通用版不再走公共 CDN jsDelivr。**
+> 自用版 22 条规则集统一走自建加速站，通用版 19 条同样走自建加速站，两版缓存都是 5 分钟级。代价是每次刷新都要从自建加速站回源（自用版约 0.2 MB、通用版约 0.13 MB；`git.521989.xyz` 由本人维护）。**通用版不再走公共 CDN jsDelivr。**
 
 ---
 
@@ -298,6 +298,13 @@ https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrock
   * 去掉 `DOMAIN,dig.bdurl.net,DIRECT,no-resolve` 与 `DOMAIN,dns.weixin.qq.com.cn,DIRECT,no-resolve` 上的 `no-resolve`（**只对 IP 类规则有意义**，写在 `DOMAIN` 上是死参数）。
   * 顺手修正说明头第 4 点：原文"`dns-server` 不管直连还是走代理的域都由它解析"与手册 546-548 相反（**覆写只作用于直连类域名**）。
   * 结果：内联 43 → **30 条**、文件 121 → **107 行**；**远端加载量不变（87,511 条）**，行为一字未变。
+* **2026-09-29（十四改）**：**自用版 B 组（逐条实证核对后执行）**——
+  * **删两张最大广告域名表**（`AdvertisingLite_Domain` + `Privacy_Domain`）⇒ 远端加载量 **87,511 → 9,900（-88.7%）**。实测损失：全库 593,355 条 REJECT 里，可归因到现行拦截表的 48,039 条中有 **43,288（90%）来自这两张表**、会被放行；**但 45% 的 REJECT（269,127 条）是 `DOMAIN-KEYWORD` 命中，其中 `reading-ad` 一条就 266,360 次**，不受删表影响。
+  * 删 3 条国内快路径 `IP-CIDR`（`101.226/15`、`180.111/16`、`183.131/16`）—— **65.6 万条事件里命中 0 次**。
+  * 补 `hijack-dns = *:53`（与通用版对齐；实测全库无 `:53` 流量，属防御性设置）。
+  * ⚠️ **`AND,((PROTOCOL,UDP),(DST-PORT,8500-8800))` 保留**：手册只收录单端口，但**实测命中 8,138 次** ⇒ 范围写法生效，**不是死规则**（`DST-PORT,3478` 2 次 / `12070` 29 次 / `123` 111 次 / `5223` 13 次同样生效）。
+  * **不做 B5（Apple 前移）**：Apple 与拦截段重叠的 5 条域名**全部只被 `AdvertisingLite_Domain` 拦**，该表已删 ⇒ 前移与不前移等价；UA 冲突只影响 Apple TV。
+  * 结果：内联 30 → **27 条**、规则集 24 → **22 条**、文件 107 → **103 行**。
 
 ---
 
