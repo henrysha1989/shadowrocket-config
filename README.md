@@ -9,27 +9,21 @@
 
 ---
 
-## 📄 三份配置
+## 📄 两份配置
 
 | 文件 | 面向 | 内联 / 规则集 | 订阅链接（自建加速，国内可用） |
 | :--- | :--- | :--- | :--- |
-| [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf) | **作者自用（默认）** | 27 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.conf) |
 | [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | **主用**：挂三张自建表（拦截/直连/代理）| 3 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) |
-| [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) | 作者自用（测试通道） | 27 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf) |
+| [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) | 测试通道（主用配置 + 换 `dns-server`）| 21 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf) |
 
-* **自用版**含 3 条自建清单（`reject-custom` / `proxy-custom` / `direct-custom`，由本机 AdGuard Home 管线维护）。
 * **通用版**（主用）挂**三张自建表**：[`reject-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/reject-custom.list)（拦截，含原 `hongguo-ad.list` 的红果/番茄专表 27 条，全 `REJECT-DROP`）、[`direct-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/direct-custom.list)、[`proxy-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/proxy-custom.list)（后两张由手机 db 分析生成；本配置 `FINAL,PROXY`，缺直连表会让本该直连的域掉进代理）；Apple 两半排在拦截之前（Apple 全直连）。
-* **测试版** = 自用版 + 1 处改动（`dns-server` 换成自建 DoH），在测「ADH 对手机 DNS 的可见性」。⚠️ 依赖自建 DoH，**别人导入会断网**。
+* **测试版** = 主用配置 + 1 处改动（`dns-server` 换成自建 DoH `doh.521989.xyz`），用来测「ADH 对手机 DNS 的可见性」。⚠️ 依赖自建 DoH，**别人导入会断网**，仅作者内网可用。
 
 每段为什么这么写、每个实验的来龙去脉与变更历史：见 [`配置说明.md`](./配置说明.md)。
 
 ---
 
 ## 📱 扫码导入（自建加速）
-
-**自用版（默认）**
-
-<img src="./qr/accelerator.png" width="300" alt="自用版 · 自建加速链接二维码">
 
 **通用版**
 
@@ -49,14 +43,14 @@
 
 | 用途 | 规则集 |
 | :--- | :--- |
-| **拦截** | `BlockHttpDNS` · `AdvertisingLite.list` · `Privacy.list`（自用版另有自建 `reject-custom.list`） |
-| **代理** | `Gemini` · `Telegram` · `YouTube` · `Google` · `Facebook` · `Twitter` · `GitHub` · `GlobalMedia`（自用版另有自建 `proxy-custom.list`） |
-| **直连** | `Apple`（`Apple.list` + `Apple_Domain.list` 两半）· `China_Domain` · `ChinaMedia` · `Download` · `Lan` · `STUN` · `Tesla`（自用版另有自建 `direct-custom.list`） |
+| **拦截** | `BlockHttpDNS` · `AdvertisingLite.list` · `Privacy.list`（+ 自建 `reject-custom.list`） |
+| **代理** | `Gemini` · `Telegram` · `YouTube` · `Google` · `Facebook` · `Twitter` · `GitHub` · `GlobalMedia`（+ 自建 `proxy-custom.list`） |
+| **直连** | `Apple`（`Apple.list` + `Apple_Domain.list` 两半）· `China_Domain` · `ChinaMedia` · `Download` · `Lan` · `STUN` · `Tesla`（+ 自建 `direct-custom.list`） |
 
 相关链接：
 
 * 上游规则集：<https://github.com/blackmatrix7/ios_rule_script>
-* 自建清单（由本机 ADH 管线自动维护）：<https://github.com/henrysha1989/shadowrocket-adr-rules>
+* 自建三张表：拦截由手机 db 分析（`--sr-analyze`）生成、直连/代理同源；ADH 侧改走 `adh-custom.txt` 过滤清单订阅：<https://github.com/henrysha1989/shadowrocket-adr-rules>
 * 加速站用法：把 GitHub 链接直接接在 `https://git.521989.xyz/` 后面
 
 ---
@@ -72,7 +66,7 @@
 
 ## ⚠️ 注意事项
 
-* **依赖**：三份配置的规则集都经作者自建加速站 `git.521989.xyz` 拉取（上游是 raw 的 Fastly 缓存，5 分钟级）。加速站不可达时规则集会全部拉取失败、整份退化成 `FINAL,PROXY`；此时把前缀换成自备镜像即可。
+* **依赖**：两份配置的规则集都经作者自建加速站 `git.521989.xyz` 拉取（上游是 raw 的 Fastly 缓存，5 分钟级）。加速站不可达时规则集会全部拉取失败、整份退化成 `FINAL,PROXY`；此时把前缀换成自备镜像即可。
 * **隐私**：本仓库不含任何服务器地址、密码或订阅凭据。
 * **来源**：规则集是远端引用的第三方列表，可用性取决于上游仓库。
 
