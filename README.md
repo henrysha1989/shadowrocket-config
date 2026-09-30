@@ -13,7 +13,7 @@
 
 | 文件 | 面向 | 内联 / 规则集 | 订阅链接（自建加速，国内可用） |
 | :--- | :--- | :--- | :--- |
-| [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | **主用**：挂三张自建表（拦截/直连/代理）| 3 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) |
+| [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | **主用**：挂三张自建表（拦截/直连/代理）| 4 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) |
 | [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) | 测试通道（主用配置 + 换 `dns-server`）| 21 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf) |
 
 * **通用版**（主用）挂**三张自建表**：[`reject-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/reject-custom.list)（拦截，含原 `hongguo-ad.list` 的红果/番茄专表 27 条，全 `REJECT-DROP`）、[`direct-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/direct-custom.list)、[`proxy-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/proxy-custom.list)（后两张由手机 db 分析生成；本配置 `FINAL,PROXY`，缺直连表会让本该直连的域掉进代理）；Apple 两半排在拦截之前（Apple 全直连）。
