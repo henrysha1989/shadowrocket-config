@@ -14,11 +14,11 @@
 | 文件 | 面向 | 内联 / 规则集 | 订阅链接（自建加速，国内可用） |
 | :--- | :--- | :--- | :--- |
 | [`shadowrocket-白名单.conf`](./shadowrocket-白名单.conf) | **作者自用（默认）** | 27 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.conf) |
-| [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | 想少几条个人内联规则、但同样要自建三表的人 | 3 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) |
+| [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | 只要公开上游规则集的人（另挂 1 张自建拦截表） | 3 / 20 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) |
 | [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) | 作者自用（测试通道） | 27 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf) |
 
 * **自用版**含 3 条自建清单（`reject-custom` / `proxy-custom` / `direct-custom`，由本机 AdGuard Home 管线维护）。
-* **通用版**挂**三张自建表**：[`reject-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/reject-custom.list)（拦截，含原 `hongguo-ad.list` 的红果/番茄专表 27 条全 `REJECT-DROP`）、[`direct-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/direct-custom.list)、[`proxy-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/proxy-custom.list)（这两张由手机 db 分析生成，2026-09-30 起补齐 —— 自用版是 `FINAL,PROXY`，缺了直连表会让本该直连的域掉进代理）；Apple 两半排在拦截之前（Apple 全直连）。
+* **通用版**只挂**一张自建表** [`reject-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/reject-custom.list)（拦截；原 `hongguo-ad.list` 的红果/番茄专表 27 条已并入它的手工区，全 `REJECT-DROP`）；Apple 两半排在拦截之前（Apple 全直连）。
 * **测试版** = 自用版 + 1 处改动（`dns-server` 换成自建 DoH），在测「ADH 对手机 DNS 的可见性」。⚠️ 依赖自建 DoH，**别人导入会断网**。
 
 每段为什么这么写、每个实验的来龙去脉与变更历史：见 [`配置说明.md`](./配置说明.md)。
