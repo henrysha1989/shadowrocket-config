@@ -1,4 +1,5 @@
 # 🚀 Shadowrocket 自用分流配置（白名单模式）
+> ⚠️ **2026-10-04**：`测试版` 已**与通用版同源同步**（自建 DoH 已随 npm 移除、ADH 转纯内网 DNS 而下线）；下表与下方文字中"换 `dns-server` 为自建 DoH"的说法为历史。
 
 个人自用的 Shadowrocket（小火箭）**规则分流配置**，只含规则，不含任何节点与凭据。
 
@@ -14,11 +15,11 @@
 | 文件 | 面向 | 内联 / 规则集 | 订阅链接（自建加速，国内可用） |
 | :--- | :--- | :--- | :--- |
 | [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | **主用**：挂三张自建表（拦截/直连/代理）| 4 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) |
-| [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) | 测试通道（主用配置 + 换 `dns-server`）| 21 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf) |
+| [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) | 测试通道（**与通用版同源同步**）| 4 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf) |
 | [`shadowrocket-白名单.稳定版.conf`](./shadowrocket-白名单.稳定版.conf) | **对照用**：纯第三方大集（拦截全走第三方；保留自建**直连**表；不含 Gemini）| 0 / 12 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E7%A8%B3%E5%AE%9A%E7%89%88.conf) · [二维码](./qr/stable-accelerator.png) |
 
 * **通用版**（主用）挂**三张自建表**：[`reject-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/reject-custom.list)（拦截，含原 `hongguo-ad.list` 的红果/番茄专表 27 条，全 `REJECT-DROP`）、[`direct-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/direct-custom.list)、[`proxy-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/proxy-custom.list)（后两张由手机 db 分析生成；本配置 `FINAL,PROXY`，缺直连表会让本该直连的域掉进代理）；Apple 两半排在拦截之前（Apple 全直连）。
-* **测试版** = 主用配置 + 1 处改动（`dns-server` 换成自建 DoH `doh.521989.xyz`），用来测「ADH 对手机 DNS 的可见性」。⚠️ 依赖自建 DoH，**别人导入会断网**，仅作者内网可用。
+* **测试版** = **与通用版同源同步**（2026-10-04 起内容一致，仅文件头注释不同）。历史：2026-09-29–10-04 曾用于 A/B 对照「DNS 走自建 DoH vs 本地 DoT」；自建 DoH 已随 npm 下线、ADH 转纯内网 DNS，差异作废，本通道自此跟随通用版。
 
 每段为什么这么写、每个实验的来龙去脉与变更历史：见 [`配置说明.md`](./配置说明.md)。
 
