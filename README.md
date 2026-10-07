@@ -1,5 +1,5 @@
 # 🚀 Shadowrocket 自用分流配置（白名单模式）
-> ⚠️ **2026-10-04**：`测试版` 已**与通用版同源同步**（自建 DoH 已随 npm 移除、ADH 转纯内网 DNS 而下线）；下表与下方文字中"换 `dns-server` 为自建 DoH"的说法为历史。
+> ⚠️ **2026-10-07 事实变更**：`shadowrocket-白名单.通用版.conf` **已于 2026-10-07 删除**，原因=与稳定版重复（稳定版既能自用、也能分享给别人），其订阅地址随之**作废**。本仓库现为**两份配置**：`稳定版`（对外公开/给别人用）+ `测试版`（作者自用主用）。
 
 个人自用的 Shadowrocket（小火箭）**规则分流配置**，只含规则，不含任何节点与凭据。
 
@@ -10,16 +10,22 @@
 
 ---
 
-## 📄 三份配置
+## 📄 两份配置
 
 | 文件 | 面向 | 内联 / 规则集 | 订阅链接（自建加速，国内可用） |
 | :--- | :--- | :--- | :--- |
-| [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | **主用**：挂三张自建表（拦截/直连/代理）| 4 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) |
-| [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) | 测试通道（**与通用版同源同步**）| 4 / 22 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf) |
-| [`shadowrocket-白名单.稳定版.conf`](./shadowrocket-白名单.稳定版.conf) | **对照用**：纯第三方大集（拦截全走第三方；保留自建**直连**表；不含 Gemini）| 0 / 12 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E7%A8%B3%E5%AE%9A%E7%89%88.conf) · [二维码](./qr/stable-accelerator.png) |
+| [`shadowrocket-白名单.稳定版.conf`](./shadowrocket-白名单.稳定版.conf) | **公开版 / 给别人用**：只挂公开上游规则集 + 一张自建**直连**表；不含 Gemini，也不挂自建拦截表 | 3 / 14 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E7%A8%B3%E5%AE%9A%E7%89%88.conf) · [二维码](./qr/stable-accelerator.png) |
+| [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) | **作者自用主用**（2026-10-07 owner：近期一直用它）：自建表全挂（`bytedance-ad.list` → `direct-custom.list` → `reject-custom.list`）+ 两张广告/隐私 `_Domain` 大表 + `Gemini.list` 分流 | 3 / 17 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf) · [二维码](./qr/test-accelerator.png) |
 
-* **通用版**（主用）挂**三张自建表**：[`reject-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/reject-custom.list)（拦截，含原 `hongguo-ad.list` 的红果/番茄专表 27 条，全 `REJECT-DROP`）、[`direct-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/direct-custom.list)、[`proxy-custom.list`](https://github.com/henrysha1989/shadowrocket-adr-rules/blob/main/proxy-custom.list)（后两张由手机 db 分析生成；本配置 `FINAL,PROXY`，缺直连表会让本该直连的域掉进代理）；Apple 两半排在拦截之前（Apple 全直连）。
-* **测试版** = **与通用版同源同步**（2026-10-04 起内容一致，仅文件头注释不同）。历史：2026-09-29–10-04 曾用于 A/B 对照「DNS 走自建 DoH vs 本地 DoT」；自建 DoH 已随 npm 下线、ADH 转纯内网 DNS，差异作废，本通道自此跟随通用版。
+> 「内联 / 规则集」里的**规则集**只数 `RULE-SET` / `DOMAIN-SET` 两种引用**类型**（稳定版 **14** = 上游 13 + 自建 1；测试版 **17** = 上游 14 + 自建 3）。
+
+* **计数口径**（全部从两份 conf 的 `[Rule]` 段实际数出，不含 `[General]` / `[URL Rewrite]` / `[MITM]`）：
+  * **稳定版**：内联 **3**（`DOMAIN-SUFFIX,521989.xyz,DIRECT` / `GEOIP,CN,DIRECT` / `FINAL,PROXY`）；远端引用行 **14** = `RULE-SET` 10 + `DOMAIN-SET` 4 = 上游 13 + 自建 `direct-custom.list` 1。
+  * **测试版**：内联 **3**（`DOMAIN-SUFFIX,521989.xyz,DIRECT` / `GEOIP,CN,DIRECT` / `FINAL,PROXY`）；远端引用行 **17** = `RULE-SET` 13 + `DOMAIN-SET` 4 = 上游 14 + 自建 3（`bytedance-ad.list` / `direct-custom.list` / `reject-custom.list`）。
+* **测试版（作者自用主用）** 与 **稳定版（公开版）** 的差异：测试版多挂 `bytedance-ad.list`（字节系广告，**排在 `direct-custom.list` 之前**；实测两张表 0 重叠，顺序当前两种都等价）、`reject-custom.list` 与 `Gemini.list`（`Gemini.list` 稳定版没有）；稳定版只挂公开上游 + 自建 `direct-custom.list`。给别人的就是稳定版。
+* `proxy-custom.list` **两份都没有引用**（设计如此：兜底 `FINAL,PROXY` 已覆盖；要显式控制再加一行）。
+
+删除留档：`通用版`（`shadowrocket-白名单.通用版.conf`）已于 **2026-10-07 删除**，原因是与稳定版重复 —— 稳定版既能自用也能分享。**它的订阅地址作废**，不要再导入。
 
 每段为什么这么写、每个实验的来龙去脉与变更历史：见 [`配置说明.md`](./配置说明.md)。
 
@@ -27,11 +33,11 @@
 
 ## 📱 扫码导入（自建加速）
 
-**通用版**
+**稳定版（公开版 / 给别人用）**
 
-<img src="./qr/generic-accelerator.png" width="300" alt="通用版 · 自建加速链接二维码">
+<img src="./qr/stable-accelerator.png" width="300" alt="稳定版 · 自建加速链接二维码">
 
-**测试版**
+**测试版（作者自用主用）**
 
 <img src="./qr/test-accelerator.png" width="300" alt="测试版 · 自建加速链接二维码">
 
@@ -41,18 +47,36 @@
 
 ## 🧩 用到的规则集
 
-全部来自 **[blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)**，经作者自建加速站 `git.521989.xyz` 拉取：
+清单下表**从两份 conf 的 `[Rule]` 段实际解析**（✅ = 该版本挂了这条）。全部上游规则集来自 **[blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)**，经作者自建加速站 `git.521989.xyz` 拉取：
 
-| 用途 | 规则集 |
-| :--- | :--- |
-| **拦截** | `BlockHttpDNS` · `AdvertisingLite.list` · `Privacy.list`（+ 自建 `reject-custom.list`） |
-| **代理** | `Gemini` · `Telegram` · `YouTube` · `Google` · `Facebook` · `Twitter` · `GitHub` · `GlobalMedia`（+ 自建 `proxy-custom.list`） |
-| **直连** | `Apple`（`Apple.list` + `Apple_Domain.list` 两半）· `China_Domain` · `ChinaMedia` · `Download` · `Lan` · `STUN` · `Tesla`（+ 自建 `direct-custom.list`） |
+| 用途 | 规则集（动作） | 稳定版 | 测试版 |
+| :--- | :--- | :---: | :---: |
+| **自建 · 直连** | `direct-custom.list`（`DIRECT`） | ✅ | ✅ |
+| **自建 · 拦截** | `bytedance-ad.list`（`REJECT-DROP`，字节系，仅测试版） | — | ✅ |
+| **自建 · 拦截** | `reject-custom.list`（`REJECT-DROP`） | — | ✅ |
+| **拦截** | `BlockHttpDNS.list`（`REJECT`） | ✅ | ✅ |
+| **拦截** | `AdvertisingLite_Domain.list`（`REJECT-DROP`，域名表） | ✅ | ✅ |
+| **拦截** | `AdvertisingLite.list`（`REJECT`） | ✅ | ✅ |
+| **拦截** | `Privacy_Domain.list`（`REJECT-DROP`，域名表） | ✅ | ✅ |
+| **拦截** | `Privacy.list`（`REJECT-DROP`） | ✅ | ✅ |
+| **直连** | `Lan.list`（`DIRECT`） | ✅ | ✅ |
+| **直连** | `STUN.list`（`DIRECT`） | ✅ | ✅ |
+| **直连** | `Apple.list`（`DIRECT`，排在拦截段之前） | ✅ | ✅ |
+| **直连** | `Apple_Domain.list`（`DIRECT` 域名表，排在拦截段之前） | ✅ | ✅ |
+| **直连** | `China_Domain.list`（`DIRECT` 域名表） | ✅ | ✅ |
+| **直连** | `ChinaMedia.list`（`DIRECT`） | ✅ | ✅ |
+| **直连** | `Download.list`（`DIRECT`） | ✅ | ✅ |
+| **代理** | `GlobalMedia.list`（`PROXY`） | ✅ | ✅ |
+| **代理** | `Gemini.list`（`PROXY`，仅测试版） | — | ✅ |
+
+* **上游**（blackmatrix7）规则集：**稳定版 13 条、测试版 14 条**（测试版多一条 `Gemini.list`）。自建：稳定版 1 条（`direct-custom.list`，合计 **14**）、测试版 3 条（合计 **17**）。
+* 两张**广告/隐私域名大表**（`AdvertisingLite_Domain` / `Privacy_Domain`，本地留档副本实测约 **37,692** / **39,916** 条）**两份都挂**；`通用版`（已于 2026-10-07 删除）当年也挂这两张。
+* ⚠️ **条目数**：远端规则集的条数随上游 `master` 变动（本文件不放编造数字）；本地可测的三张自建表 + 两张 `_Domain` 大表规模见 [`配置说明.md`](./配置说明.md) 的「🧩 规则集清单」。
 
 相关链接：
 
 * 上游规则集：<https://github.com/blackmatrix7/ios_rule_script>
-* 自建三张表：拦截由手机 db 分析（`--sr-analyze`）生成、直连/代理同源；ADH 侧改走 `adh-custom.txt` 过滤清单订阅：<https://github.com/henrysha1989/shadowrocket-adr-rules>
+* 自建清单：拦截表由手机 db 分析（`--sr-analyze`）生成、直连表同源；ADH 侧走 `adh-custom.txt` 过滤清单订阅：<https://github.com/henrysha1989/shadowrocket-adr-rules>
 * 加速站用法：把 GitHub 链接直接接在 `https://git.521989.xyz/` 后面
 
 ---
@@ -69,6 +93,8 @@
 ## ⚠️ 注意事项
 
 * **依赖**：两份配置的规则集都经作者自建加速站 `git.521989.xyz` 拉取（上游是 raw 的 Fastly 缓存，5 分钟级）。加速站不可达时规则集会全部拉取失败、整份退化成 `FINAL,PROXY`；此时把前缀换成自备镜像即可。
+* **给别人的是稳定版**：`测试版` 是作者自用主用配置（含作者自建清单与个人取舍），别人导入可能出现「本来该直连的域掉进代理」之类的差异；分享/公开场合请用 `稳定版`。
+* **已删除**：`通用版` 已于 2026-10-07 删除，订阅地址作废（原因见顶部）。
 * **隐私**：本仓库不含任何服务器地址、密码或订阅凭据。
 * **来源**：规则集是远端引用的第三方列表，可用性取决于上游仓库。
 
