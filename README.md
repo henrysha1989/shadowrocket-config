@@ -14,15 +14,15 @@
 
 | 文件 | 面向 | 内联 / 规则集 | 订阅链接（自建加速，国内可用） |
 | :--- | :--- | :--- | :--- |
-| [`shadowrocket-白名单.稳定版.conf`](./shadowrocket-白名单.稳定版.conf) | **公开版 / 给别人用**：只挂公开上游规则集 + 一张自建**直连**表；不含 Gemini，也不挂自建拦截表 | 3 / 14 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E7%A8%B3%E5%AE%9A%E7%89%88.conf) · [二维码](./qr/stable-accelerator.png) |
-| [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) | **作者自用主用**（2026-10-07 owner：近期一直用它）：自建表全挂（`bytedance-ad.list` → `direct-custom.list` → `reject-custom.list`）+ 两张广告/隐私 `_Domain` 大表 + `Gemini.list` 分流 | 3 / 17 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf) · [二维码](./qr/test-accelerator.png) |
+| [`shadowrocket-白名单.稳定版.conf`](./shadowrocket-白名单.稳定版.conf) | **公开版 / 给别人用**：只挂公开上游规则集 + 一张自建**直连**表；不挂自建拦截表 | 3 / 14 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E7%A8%B3%E5%AE%9A%E7%89%88.conf) · [二维码](./qr/stable-accelerator.png) |
+| [`shadowrocket-白名单.测试版.conf`](./shadowrocket-白名单.测试版.conf) | **作者自用主用**（2026-10-07 owner：近期一直用它）：自建表全挂（`bytedance-ad.list` → `direct-custom.list` → `reject-custom.list`）+ 两张广告/隐私 `_Domain` 大表 | 3 / 16 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E6%B5%8B%E8%AF%95%E7%89%88.conf) · [二维码](./qr/test-accelerator.png) |
 
 > 「内联 / 规则集」里的**规则集**只数 `RULE-SET` / `DOMAIN-SET` 两种引用**类型**（稳定版 **14** = 上游 13 + 自建 1；测试版 **17** = 上游 14 + 自建 3）。
 
 * **计数口径**（全部从两份 conf 的 `[Rule]` 段实际数出，不含 `[General]` / `[URL Rewrite]` / `[MITM]`）：
   * **稳定版**：内联 **3**（`DOMAIN-SUFFIX,521989.xyz,DIRECT` / `GEOIP,CN,DIRECT` / `FINAL,PROXY`）；远端引用行 **14** = `RULE-SET` 10 + `DOMAIN-SET` 4 = 上游 13 + 自建 `direct-custom.list` 1。
   * **测试版**：内联 **3**（`DOMAIN-SUFFIX,521989.xyz,DIRECT` / `GEOIP,CN,DIRECT` / `FINAL,PROXY`）；远端引用行 **17** = `RULE-SET` 13 + `DOMAIN-SET` 4 = 上游 14 + 自建 3（`bytedance-ad.list` / `direct-custom.list` / `reject-custom.list`）。
-* **测试版（作者自用主用）** 与 **稳定版（公开版）** 的差异：测试版多挂 `bytedance-ad.list`（字节系广告，**排在 `direct-custom.list` 之前**；实测两张表 0 重叠，顺序当前两种都等价）、`reject-custom.list` 与 `Gemini.list`（`Gemini.list` 稳定版没有）；稳定版只挂公开上游 + 自建 `direct-custom.list`。给别人的就是稳定版。
+* **测试版（作者自用主用）** 与 **稳定版（公开版）** 的差异：测试版多挂 `bytedance-ad.list`（字节系广告，**排在 `direct-custom.list` 之前**；实测两张表 0 重叠，顺序当前两种都等价）、`reject-custom.list`；稳定版只挂公开上游 + 自建 `direct-custom.list`。给别人的就是稳定版。
 * `proxy-custom.list` **两份都没有引用**（设计如此：兜底 `FINAL,PROXY` 已覆盖；要显式控制再加一行）。
 
 删除留档：`通用版`（`shadowrocket-白名单.通用版.conf`）已于 **2026-10-07 删除**，原因是与稳定版重复 —— 稳定版既能自用也能分享。**它的订阅地址作废**，不要再导入。
@@ -67,9 +67,8 @@
 | **直连** | `ChinaMedia.list`（`DIRECT`） | ✅ | ✅ |
 | **直连** | `Download.list`（`DIRECT`） | ✅ | ✅ |
 | **代理** | `GlobalMedia.list`（`PROXY`） | ✅ | ✅ |
-| **代理** | `Gemini.list`（`PROXY`，仅测试版） | — | ✅ |
 
-* **上游**（blackmatrix7）规则集：**稳定版 13 条、测试版 14 条**（测试版多一条 `Gemini.list`）。自建：稳定版 1 条（`direct-custom.list`，合计 **14**）、测试版 3 条（合计 **17**）。
+* **上游**（blackmatrix7）规则集：**两份都是 13 条、完全一致**。差异只在自建表：稳定版 1 条（`direct-custom.list`，合计 **14**）、测试版 3 条（合计 **16**）。
 * 两张**广告/隐私域名大表**（`AdvertisingLite_Domain` / `Privacy_Domain`，本地留档副本实测约 **37,692** / **39,916** 条）**两份都挂**；`通用版`（已于 2026-10-07 删除）当年也挂这两张。
 * ⚠️ **条目数**：远端规则集的条数随上游 `master` 变动（本文件不放编造数字）；本地可测的三张自建表 + 两张 `_Domain` 大表规模见 [`配置说明.md`](./配置说明.md) 的「🧩 规则集清单」。
 
