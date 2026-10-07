@@ -26,7 +26,8 @@
   * **稳定版**：内联 **3**（`DOMAIN-SUFFIX,521989.xyz,DIRECT` / `GEOIP,CN,DIRECT` / `FINAL,PROXY`）；远端引用行 **14** = `RULE-SET` 10 + `DOMAIN-SET` 4 = 上游 13 + 自建 `direct-custom.list` 1。
   * **测试版**：内联 **3**（`DOMAIN-SUFFIX,521989.xyz,DIRECT` / `GEOIP,CN,DIRECT` / `FINAL,PROXY`）；远端引用行 **16** = `RULE-SET` 12 + `DOMAIN-SET` 4 = 上游 13 + 自建 3（`bytedance-ad.list` / `direct-custom.list` / `reject-custom.list`）。
   * **黑名单·极简版**：内联 **1**（只有 `FINAL,DIRECT`）；远端引用行 **18** = `RULE-SET` 15 + `DOMAIN-SET` 3 = 上游 16 + 自建 2（`bytedance-ad.list` / `direct-custom.list`）。
-* **测试版（作者自用主用）** 与 **稳定版（公开版）** 的差异：测试版多挂 `bytedance-ad.list`（字节系广告，**排在 `direct-custom.list` 之前**；实测两张表 0 重叠，顺序当前两种都等价）、`reject-custom.list`；稳定版只挂公开上游 + 自建 `direct-custom.list`。给别人的就是稳定版。
+* **测试版（作者自用主用）** 与 **稳定版（公开版）** 的差异：测试版多挂 `bytedance-ad.list`（字节系广告，**排在 `direct-custom.list` 之后** —— 自建放行必须压得住拦截，见下方注）、`reject-custom.list`；稳定版只挂公开上游 + 自建 `direct-custom.list`。
+* ⚠️ **顺序不是小事（2026-10-07 踩过）**：`bytedance-ad.list` 含 `-reading-sign` 等**族关键字**。它一度被排在 `direct-custom.list` **之前**，于是 `p3-reading-sign.fqnovelpic.com` / `p9-…`（番茄/红果的**图片 CDN**，直连表里专门为它加的 `fqnovelpic.com`）被关键字抢先 `REJECT-DROP` ⇒ **红果/番茄图片加载失败、App 报网络异常**。现已改回「直连表在前」。给别人的就是稳定版。
 * `proxy-custom.list` **三份都没有引用**（设计如此：白名单靠 `FINAL,PROXY`、黑名单靠 `FINAL,DIRECT` 兜底；要显式控制再加一行）。
 
 删除留档：`通用版`（`shadowrocket-白名单.通用版.conf`）已于 **2026-10-07 删除**，原因是与稳定版重复 —— 稳定版既能自用也能分享。**它的订阅地址作废**，不要再导入。
