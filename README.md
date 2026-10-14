@@ -1,5 +1,5 @@
 # 🚀 Shadowrocket 自用分流配置（白名单 / 黑名单 两种模式）
-> 🔄 **2026-10-14 通用版再改：拦截段全清（纯分流版）**。`shadowrocket-白名单.通用版.conf` 停用 5 个拦截规则集 —— `BlockHttpDNS`(63) / `AdvertisingLite_Domain`(37,692) / `AdvertisingLite`(376) / `Privacy_Domain`(39,916) / `Privacy`(20)，合计 **78,067 条**；规则总数 **85,336 → 7,269**。它现在**不再拦广告 / 跟踪 / HTTPDNS**，只做分流。原因是**朋友那边耗电异常**：2026-10-14 同日实测对照 —— Shadowrocket（85,747 条）≈ **9.9 %/h**、Clash iOS（8,428 条）≈ **0.70 %/h**，两张 4 万级域名表占全部规则 91%，是 iOS 网络扩展（50 MB 上限）下最可疑的变量。**被停用的 5 行在文件里原样注释保留**（恢复 = 去掉行首 `# `）；`[General]` 段**一字未动**（一次只改一处才看得清效果）。**`自用版` 不受影响。**
+> 🔄 **2026-10-14 通用版再改：拦截段全清（纯分流版）**。`shadowrocket-白名单.通用版.conf` 停用 **4** 个拦截规则集 —— `AdvertisingLite_Domain`(37,692) / `AdvertisingLite`(376) / `Privacy_Domain`(39,916) / `Privacy`(20)，合计 **78,004 条**；规则总数 **85,336 → 7,332**。**`BlockHttpDNS`(63) 当晚按 owner 指示恢复启用** —— 它是这批里唯一与 DNS 路径有关的（拦 App 用 HTTPDNS 服务绕过隧道自行解析）。它现在**不拦广告 / 跟踪**，但仍拦 HTTPDNS。原因是**朋友那边耗电异常**：2026-10-14 同日实测对照 —— Shadowrocket（85,747 条）≈ **9.9 %/h**、Clash iOS（8,428 条）≈ **0.70 %/h**，两张 4 万级域名表占全部规则 91%，是 iOS 网络扩展（50 MB 上限）下最可疑的变量。**被停用的 4 行在文件里原样注释保留**（恢复 = 去掉行首 `# `）；`[General]` 段**一字未动**（一次只改一处才看得清效果）。**`自用版` 不受影响。**
 > 🔄 **2026-10-10 改名**：`测试版` → **`自用版`**（内容只改名称）；`稳定版` → **`通用版`**（同时**去掉自建规则集**，纯公开上游）。本仓库现为**三份配置**：两份**白名单模式**（`自用版` 作者自用 / `通用版` 对外公开）+ 一份**黑名单模式**（`黑名单·极简版`）。
 > 📌 更早还有一份**旧通用版**（`shadowrocket-白名单.通用版.conf`，2026-10-07 删除）与**旧自用版**（`shadowrocket-白名单.conf`，2026-09-30 删除）—— 它们与现在同名的配置**不是同一份文件**，别混淆。
 
@@ -19,16 +19,16 @@
 | 文件 | 面向 | 内联 / 规则集 | 订阅链接（自建加速，国内可用） |
 | :--- | :--- | :--- | :--- |
 | [`shadowrocket-白名单.自用版.conf`](./shadowrocket-白名单.自用版.conf) | **作者自用主用**：自建表全挂（`direct-custom` → `bytedance-ad` → `soul-ad` → `reject-custom`）+ 两张广告/隐私 `_Domain` 大表；另有 1 条内联拦截（`www.qchannel01.cn`，排直连表之前） | 4 / 17 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E8%87%AA%E7%94%A8%E7%89%88.conf) · [二维码](./qr/selfuse-accelerator.png) |
-| [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | **公开版 / 给别人用**：**纯公开上游**，一张自建表都不挂（2026-10-10 起）；**2026-10-14 起拦截段全清 = 纯分流版**（不再拦广告/跟踪/HTTPDNS） | 3 / 8 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) · [二维码](./qr/generic-accelerator.png) |
+| [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | **公开版 / 给别人用**：**纯公开上游**，一张自建表都不挂（2026-10-10 起）；**2026-10-14 起拦截段只保留 `BlockHttpDNS`**（不拦广告/跟踪，仍拦 HTTPDNS） | 3 / 9 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) · [二维码](./qr/generic-accelerator.png) |
 | [`shadowrocket-黑名单.极简版.conf`](./shadowrocket-黑名单.极简版.conf) | **黑名单模式**：`FINAL,DIRECT`；只挂拦广告/隐私的公开表 + 自建 `bytedance-ad` / `direct-custom`，代理段只列境外服务与 `Proxy` 大表 | 1 / 18 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E9%BB%91%E5%90%8D%E5%8D%95.%E6%9E%81%E7%AE%80%E7%89%88.conf) · [二维码](./qr/blacklist-accelerator.png) |
 
-> 「内联 / 规则集」里的**规则集**只数 `RULE-SET` / `DOMAIN-SET` 两种引用**类型**（自用版 **17** = 上游 13 + 自建 4；通用版 **8** = 上游 8 + 自建 0（2026-10-14 停用 5 个拦截集）；黑名单版 **18** = 上游 16 + 自建 2）。
+> 「内联 / 规则集」里的**规则集**只数 `RULE-SET` / `DOMAIN-SET` 两种引用**类型**（自用版 **17** = 上游 13 + 自建 4；通用版 **9** = 上游 9 + 自建 0（2026-10-14 停用 4 个拦截集）；黑名单版 **18** = 上游 16 + 自建 2）。
 
 * **计数口径**（全部从三份 conf 的 `[Rule]` 段实际数出，不含 `[General]` / `[URL Rewrite]` / `[MITM]`）：
   * **自用版**：内联 **4**（`DOMAIN-SUFFIX,521989.xyz,DIRECT` / `DOMAIN,www.qchannel01.cn,REJECT-DROP` / `GEOIP,CN,DIRECT` / `FINAL,PROXY`；第二条必须在直连表之前）；远端引用行 **17** = `RULE-SET` 13 + `DOMAIN-SET` 4 = 上游 13 + 自建 4（`direct-custom.list` / `bytedance-ad.list` / `soul-ad.list` / `reject-custom.list`）。
-  * **通用版**：内联 **3**；远端引用行 **8** = `RULE-SET` 6 + `DOMAIN-SET` 2 = 上游 8 + **自建 0**（2026-10-14 停用 5 个拦截集，共 **78,067** 条：`BlockHttpDNS` / `AdvertisingLite_Domain` / `AdvertisingLite` / `Privacy_Domain` / `Privacy`；规则总数 85,336 → **7,269**）。
+  * **通用版**：内联 **3**；远端引用行 **9** = `RULE-SET` 7 + `DOMAIN-SET` 2 = 上游 9 + **自建 0**（2026-10-14 停用 4 个拦截集，共 **78,004** 条：`AdvertisingLite_Domain` / `AdvertisingLite` / `Privacy_Domain` / `Privacy`；`BlockHttpDNS` 63 条当晚恢复；规则总数 85,336 → **7,332**）。
   * **黑名单·极简版**：内联 **1**（只有 `FINAL,DIRECT`）；远端引用行 **18** = `RULE-SET` 15 + `DOMAIN-SET` 3 = 上游 16 + 自建 2（`bytedance-ad.list` / `direct-custom.list`）。
-* **自用版 与 通用版 的差异**：自用版多挂 4 张自建表（`direct-custom` 直连 + `bytedance-ad` / `soul-ad` / `reject-custom` 拦截）；通用版**纯公开上游**，不带任何自建表 —— 别人的拦截/放行目标与作者不同，挂自建表对别人没意义。**2026-10-14 起通用版又多一条差异：5 个拦截集已停用（纯分流）**。
+* **自用版 与 通用版 的差异**：自用版多挂 4 张自建表（`direct-custom` 直连 + `bytedance-ad` / `soul-ad` / `reject-custom` 拦截）；通用版**纯公开上游**，不带任何自建表 —— 别人的拦截/放行目标与作者不同，挂自建表对别人没意义。**2026-10-14 起通用版又多一条差异：4 个广告/隐私拦截集已停用**（只保留 `BlockHttpDNS`）。
 * ⚠️ **顺序不是小事（2026-10-07 踩过）**：`bytedance-ad.list` 含 `-ad-sign`、`-misc-lf` 等**族关键字**，必须排在 `direct-custom.list` **之后**；它一度被排在前面，于是 `p3-reading-sign.fqnovelpic.com` / `p9-…`（番茄/红果的**图片 CDN**，直连表里专门为它加的 `fqnovelpic.com`）被关键字抢先 `REJECT-DROP` ⇒ **红果/番茄图片加载失败、App 报网络异常**。给别人的通用版已不含自建表，天然没有这个坑。
 * `proxy-custom.list` **三份都没有引用**（设计如此：白名单靠 `FINAL,PROXY`、黑名单靠 `FINAL,DIRECT` 兜底；要显式控制再加一行）。
 * 通用版保留 `block-quic = all-proxy` / `hijack-dns = *:53` / `udp-policy-not-supported-behaviour = REJECT` 等**强切 TCP**项（去掉自建表时未动）。
@@ -69,7 +69,7 @@
 | **自建 · 拦截** | `bytedance-ad.list`（`REJECT-DROP`，字节系） | ✅ | — |
 | **自建 · 拦截** | `soul-ad.list`（`REJECT-DROP`，Soul） | ✅ | — |
 | **自建 · 拦截** | `reject-custom.list`（`REJECT-DROP`） | ✅ | — |
-| **拦截** | `BlockHttpDNS.list`（`REJECT`） | ✅ | — <br>（2026-10-14 停用，防 App 绕 DNS） |
+| **拦截** | `BlockHttpDNS.list`（`REJECT`，防 App 绕过隧道自行解析） | ✅ | ✅ |
 | **拦截** | `AdvertisingLite_Domain.list`（`REJECT-DROP`，域名表） | ✅ | — <br>（2026-10-14 停用，37,692 条） |
 | **拦截** | `AdvertisingLite.list`（`REJECT`） | ✅ | — <br>（2026-10-14 停用，376 条） |
 | **拦截** | `Privacy_Domain.list`（`REJECT-DROP`，域名表） | ✅ | — <br>（2026-10-14 停用，39,916 条） |
@@ -83,7 +83,7 @@
 | **直连** | `Download.list`（`DIRECT`） | ✅ | ✅ |
 | **代理** | `GlobalMedia.list`（`PROXY`） | ✅ | ✅ |
 
-* **上游**（blackmatrix7）规则集：自用版 **13 条**、通用版 **8 条**（2026-10-14 通用版停用 5 个拦截集后不再一致）；此外自用版另有 4 张自建表。黑名单版的上游是另一套（见下）。
+* **上游**（blackmatrix7）规则集：自用版 **13 条**、通用版 **9 条**（2026-10-14 通用版停用 4 个广告/隐私拦截集后不再一致）；此外自用版另有 4 张自建表。黑名单版的上游是另一套（见下）。
 
 **黑名单·极简版 与上面两列的差异**（`FINAL,DIRECT` 兜底，只有这里列出的条目不同）：
 
@@ -121,7 +121,7 @@
 ## ⚠️ 注意事项
 
 * **依赖**：三份配置的规则集都经作者自建加速站 `git.521989.xyz` 拉取（上游是 raw 的 Fastly 缓存，5 分钟级）。加速站不可达时规则集会全部拉取失败、整份退化成各自的兜底（白名单 `FINAL,PROXY`、黑名单 `FINAL,DIRECT`）；此时把前缀换成自备镜像即可。
-* **给别人的是通用版**：通用版 = 纯公开上游（不含作者自建表），拿过去就能用；**但它 2026-10-14 起已不拦广告/跟踪/HTTPDNS（纯分流）** —— 要拦广告就用 `黑名单·极简版`，或在 DNS 层做；`自用版` 是作者自用主用配置（含自建清单与个人取舍），别人导入可能出现「本来该直连的域掉进代理」之类的差异。
+* **给别人的是通用版**：通用版 = 纯公开上游（不含作者自建表），拿过去就能用；**但它 2026-10-14 起已不拦广告/跟踪**（`BlockHttpDNS` 仍在）—— 要拦广告就用 `黑名单·极简版`，或在 DNS 层做；`自用版` 是作者自用主用配置（含自建清单与个人取舍），别人导入可能出现「本来该直连的域掉进代理」之类的差异。
 * **该用哪份**：想「全局走代理、国内直连」= 白名单（`通用版`）；想「平时全直连、只拦广告 + 少数境外服务走代理」= **黑名单·极简版**。
 * **改名提醒**：2026-10-10 起 `测试版` → `自用版`、`稳定版` → `通用版`；旧的订阅地址（含 `测试版`/`稳定版` 的）已失效，请用上表新地址。
 * **隐私**：本仓库不含任何服务器地址、密码或订阅凭据。
