@@ -1,6 +1,9 @@
 # 🚀 Shadowrocket 自用分流配置（白名单 / 黑名单 两种模式）
 > 🔄 **2026-10-14 通用版：拦截段"先清后恢复"**。白天为排查朋友那边的耗电，曾按 owner 指令把 4 个拦截规则集（`AdvertisingLite_Domain` 37,692 / `AdvertisingLite` 376 / `Privacy_Domain` 39,916 / `Privacy` 20）临时停用（规则 85,336 → 7,332），停用期间只保留 `BlockHttpDNS`；**当晚 owner 指示全部恢复** ⇒ 拦截段与 2026-10-10 的状态**逐字节一致**，规则总数回到 **85,336**、规则集 **13 个**。**结论：规则规模不是那台手机的耗电主因**（同口径实测 Shadowrocket 85,747 条 ≈ **9.9 %/h** vs Clash iOS 8,428 条 ≈ **0.70 %/h**，差距在客户端实现）。**三份 `[General]` 已对齐**（主 DNS → DoT、删 `dns-fallback-system`、白名单两份补 `GEOIP,CN,...,no-resolve`），并正在做 **`ipv6` 单变量测试：当前三份都是 `ipv6 = false`**（其余修复保留）—— 白天"修泄漏"时同时动了 3 个变量，`ipv6` 那步从未被单独验证。
 > 🔧 **2026-10-14 晚续改（修 DNS 泄漏）**：① `GEOIP,CN,DIRECT` → **`GEOIP,CN,DIRECT,no-resolve`** —— 手册 716-718：IP 类规则遇到域名请求会**触发一次本地解析**，缺 `no-resolve` 就是"运营商解析器 + 节点解析器"混在一起的指纹来源（治本）；② `dns-server` / `direct-dns-server` 由阿里/腾讯 **DoH 改成 DoT + 裸 IP**（`tls://223.5.5.5, tls://1.12.12.12`）—— DoH 要先解析 `dns.alidns.com`，手册说这步走系统 DNS；DoT 无 bootstrap，实测首查 54ms vs 121ms；③ 删掉手册里**根本不存在**的 `dns-fallback-system`。
+> 🔥 **2026-10-14 深夜：卡顿回归修复**（owner 实测「刷抖音/红果卡，红果最明显」）。手机 DB（23:31）对照定位到两条：
+> ① **`no-resolve` 是主因** —— 它让"不在国内域名清单里的域名"跳过 `GEOIP,CN`、直落 `FINAL,PROXY`；实测**红果 77%、抖音 28% 的连接走了代理**，而当时选中的节点是「🇯🇵 日本1」⇒ 国内内容绕日本。旧配置下这些主机 100% DIRECT。⇒ **`no-resolve` 已摘掉**（回到 `GEOIP,CN,DIRECT`），泄漏改由 DoT 那条路兜（需复核 dnsleaktest）。
+> ② **字节系被普通 `REJECT` 秒级重试** —— 恢复的广告表拦了字节系主机 125 条，最高重试 **56 次**（4 个主机 ≥20 次）⇒ `BlockHttpDNS.list` 与 `AdvertisingLite.list` 的动作由 `REJECT` 改为 **`REJECT-DROP`**（09-27 的结论：DROP 才治重试风暴）。
 > 🔄 **2026-10-10 改名**：`测试版` → **`自用版`**（内容只改名称）；`稳定版` → **`通用版`**（同时**去掉自建规则集**，纯公开上游）。本仓库现为**三份配置**：两份**白名单模式**（`自用版` 作者自用 / `通用版` 对外公开）+ 一份**黑名单模式**（`黑名单·极简版`）。
 > 📌 更早还有一份**旧通用版**（`shadowrocket-白名单.通用版.conf`，2026-10-07 删除）与**旧自用版**（`shadowrocket-白名单.conf`，2026-09-30 删除）—— 它们与现在同名的配置**不是同一份文件**，别混淆。
 
@@ -70,9 +73,9 @@
 | **自建 · 拦截** | `bytedance-ad.list`（`REJECT-DROP`，字节系） | ✅ | — |
 | **自建 · 拦截** | `soul-ad.list`（`REJECT-DROP`，Soul） | ✅ | — |
 | **自建 · 拦截** | `reject-custom.list`（`REJECT-DROP`） | ✅ | — |
-| **拦截** | `BlockHttpDNS.list`（`REJECT`，防 App 绕过隧道自行解析） | ✅ | ✅ |
+| **拦截** | `BlockHttpDNS.list`（**`REJECT-DROP`**，防 App 绕过隧道自行解析；2026-10-14 由 `REJECT` 改） | ✅ | ✅ |
 | **拦截** | `AdvertisingLite_Domain.list`（`REJECT-DROP`，域名表） | ✅ | ✅ |
-| **拦截** | `AdvertisingLite.list`（`REJECT`） | ✅ | ✅ |
+| **拦截** | `AdvertisingLite.list`（**`REJECT-DROP`**；2026-10-14 由 `REJECT` 改，防字节系秒级重试） | ✅ | ✅ |
 | **拦截** | `Privacy_Domain.list`（`REJECT-DROP`，域名表） | ✅ | ✅ |
 | **拦截** | `Privacy.list`（`REJECT-DROP`） | ✅ | ✅ |
 | **直连** | `Lan.list`（`DIRECT`） | ✅ | ✅ |
