@@ -1,5 +1,5 @@
 # 🚀 Shadowrocket 自用分流配置（白名单 / 黑名单 两种模式）
-> 🆕 **2026-10-16 新增第四份：`懒人版·改版`（`shadowrocket-lazy-revised.conf`）** —— 骨架取自 [johnshall/Shadowrocket-ADBlock-Rules-Forever](https://johnshall.github.io/Shadowrocket-ADBlock-Rules-Forever/lazy.conf) 的**精简版**（原文 346 行 = 注释 204 + 空行 74 + **生效仅 68**，只保留生效行 ⇒ **68 行 / 5.0 KB**），**`[Rule]` 段整段换成 `通用版` 的规则**（14 条逐行一致）；`[General]` / `[Proxy]` / `[Proxy Group]` / `[Host]` / `[URL Rewrite]` / `[MITM]` 是 johnshall 原文，**一字未改**。定位：想用 johnshall 的 `[General]` 调优（`stun-response-ip` / `icmp-auto-reply` / `block-quic = all-proxy` 等）又要自建规则集的人。⚠️ 两处已知项见下方「注意事项」。
+> 🆕 **2026-10-16 新增第四份：`懒人版·改版`（`shadowrocket-lazy-revised.conf`）** —— 骨架取自 [johnshall/Shadowrocket-ADBlock-Rules-Forever](https://johnshall.github.io/Shadowrocket-ADBlock-Rules-Forever/lazy.conf) 的**精简版**（原文 346 行 = 注释 204 + 空行 74 + **生效仅 68**，只保留生效行），**`[Rule]` 段整段换成 `通用版` 的规则**（14 条逐行一致），再**加 1 条 Johnshall 广告表**（57,856 条，A1 实验，见下方「注意事项」）；`[General]` / `[Proxy]` / `[Proxy Group]` / `[Host]` / `[URL Rewrite]` / `[MITM]` 是 johnshall 原文，**一字未改**。定位：想用 johnshall 的 `[General]` 调优（`stun-response-ip` / `icmp-auto-reply` / `block-quic = all-proxy` 等）又要自建规则集的人。⚠️ 已知项见下方「注意事项」。
 > 🔋 **2026-10-15 通用版：省电精简** —— 按 owner 指令**停用两张 4 万级 DOMAIN 大表**（`Privacy_Domain` 39,916 + `AdvertisingLite_Domain` 37,692 = **77,608 条，占原规则 91%**）⇒ 规则总数 **85,336 → 7,728**、规则集 **13 → 11**。**保留三个小表**（`BlockHttpDNS` 63 / `AdvertisingLite.list` 376 关键词+IP / `Privacy.list` 20）⇒ **关键词/正则级拦截仍有效**，去掉的只是"逐域名大表"。动机：小火箭实测 **2.5–9 %/h** vs Clash **1.0–1.3 %/h**，"规则规模"是配置侧剩下的最大变量。被停用的两行在文件里注释保留，**恢复 = 去掉行首 `# `**。
 > 🔄 **2026-10-14 通用版：拦截段"先清后恢复"**。白天为排查朋友那边的耗电，曾按 owner 指令把 4 个拦截规则集（`AdvertisingLite_Domain` 37,692 / `AdvertisingLite` 376 / `Privacy_Domain` 39,916 / `Privacy` 20）临时停用（规则 85,336 → 7,332），停用期间只保留 `BlockHttpDNS`；**当晚 owner 指示全部恢复** ⇒ 拦截段与 2026-10-10 的状态**逐字节一致**，规则总数回到 **85,336**、规则集 **13 个**。**结论：规则规模不是那台手机的耗电主因**（同口径实测 Shadowrocket 85,747 条 ≈ **9.9 %/h** vs Clash iOS 8,428 条 ≈ **0.70 %/h**，差距在客户端实现）。**三份 `[General]` 已对齐**（主 DNS → DoT、删 `dns-fallback-system`、白名单两份补 `GEOIP,CN,...,no-resolve`），并正在做 **`ipv6` 单变量测试：当前三份都是 `ipv6 = false`**（其余修复保留）—— 白天"修泄漏"时同时动了 3 个变量，`ipv6` 那步从未被单独验证。
 > 🔧 **2026-10-14 晚续改（修 DNS 泄漏）**：① `GEOIP,CN,DIRECT` → **`GEOIP,CN,DIRECT,no-resolve`** —— 手册 716-718：IP 类规则遇到域名请求会**触发一次本地解析**，缺 `no-resolve` 就是"运营商解析器 + 节点解析器"混在一起的指纹来源（治本）；② `dns-server` / `direct-dns-server` 由阿里/腾讯 **DoH 改成 DoT + 裸 IP**（`tls://223.5.5.5, tls://1.12.12.12`）—— DoH 要先解析 `dns.alidns.com`，手册说这步走系统 DNS；DoT 无 bootstrap，实测首查 54ms vs 121ms；③ 删掉手册里**根本不存在**的 `dns-fallback-system`。
@@ -26,15 +26,15 @@
 | :--- | :--- | :--- | :--- |
 | [`shadowrocket-白名单.自用版.conf`](./shadowrocket-白名单.自用版.conf) | **作者自用主用**：自建表全挂（`direct-custom` → `bytedance-ad` → `soul-ad` → `reject-custom`）+ 两张广告/隐私 `_Domain` 大表；另有 1 条内联拦截（`www.qchannel01.cn`，排直连表之前） | 4 / 17 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E8%87%AA%E7%94%A8%E7%89%88.conf) · [二维码](./qr/selfuse-accelerator.png) |
 | [`shadowrocket-白名单.通用版.conf`](./shadowrocket-白名单.通用版.conf) | **公开版 / 给别人用**：**纯公开上游**，一张自建表都不挂（2026-10-10 起）；**拦截段只剩三个小表**（两张 4 万级 DOMAIN 表 2026-10-15 停用） | 3 / 11 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E7%99%BD%E5%90%8D%E5%8D%95.%E9%80%9A%E7%94%A8%E7%89%88.conf) · [二维码](./qr/generic-accelerator.png) |
-| [`shadowrocket-lazy-revised.conf`](./shadowrocket-lazy-revised.conf) | **懒人版·改版**：骨架 = johnshall 懒人配置的**精简版**（只留生效行，68 行）；**`[Rule]` 与 `通用版` 逐行一致**；`[General]` 等其余段是 johnshall 原文 | 3 / 11 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-lazy-revised.conf) · [二维码](./qr/lazy-accelerator.png) |
+| [`shadowrocket-lazy-revised.conf`](./shadowrocket-lazy-revised.conf) | **懒人版·改版**：骨架 = johnshall 懒人配置的**精简版**（只留生效行）；`[Rule]` = `通用版` 的 14 条 **+ 1 条 Johnshall 广告表**（A1 实验，见下）；`[General]` 等其余段是 johnshall 原文 | 3 / 12 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-lazy-revised.conf) · [二维码](./qr/lazy-accelerator.png) |
 | [`shadowrocket-黑名单.极简版.conf`](./shadowrocket-黑名单.极简版.conf) | **黑名单模式**：`FINAL,DIRECT`；只挂拦广告/隐私的公开表 + 自建 `bytedance-ad` / `direct-custom`，代理段只列境外服务与 `Proxy` 大表 | 1 / 18 | [订阅](https://git.521989.xyz/https://raw.githubusercontent.com/henrysha1989/shadowrocket-config/main/shadowrocket-%E9%BB%91%E5%90%8D%E5%8D%95.%E6%9E%81%E7%AE%80%E7%89%88.conf) · [二维码](./qr/blacklist-accelerator.png) |
 
-> 「内联 / 规则集」里的**规则集**只数 `RULE-SET` / `DOMAIN-SET` 两种引用**类型**（自用版 **17** = 上游 13 + 自建 4；通用版 **11** = 上游 11 + 自建 0；懒人版 **11** = 上游 11 + 自建 0；黑名单版 **18** = 上游 16 + 自建 2）。
+> 「内联 / 规则集」里的**规则集**只数 `RULE-SET` / `DOMAIN-SET` 两种引用**类型**（自用版 **17** = 上游 13 + 自建 4；通用版 **11** = 上游 11 + 自建 0；懒人版 **12** = blackmatrix7 11 + Johnshall 1 + 自建 0；黑名单版 **18** = 上游 16 + 自建 2）。
 
 * **计数口径**（全部从四份 conf 的 `[Rule]` 段实际数出，不含 `[General]` / `[URL Rewrite]` / `[MITM]`）：
   * **自用版**：内联 **4**（`DOMAIN-SUFFIX,521989.xyz,DIRECT` / `DOMAIN,www.qchannel01.cn,REJECT-DROP` / `GEOIP,CN,DIRECT` / `FINAL,PROXY`；第二条必须在直连表之前）；远端引用行 **17** = `RULE-SET` 13 + `DOMAIN-SET` 4 = 上游 13 + 自建 4（`direct-custom.list` / `bytedance-ad.list` / `soul-ad.list` / `reject-custom.list`）。
   * **通用版**：内联 **3**；远端引用行 **11** = `RULE-SET` 9 + `DOMAIN-SET` 2 = 上游 11 + **自建 0**（规则总数 **7,728**；2026-10-15 停用两张 4 万级 DOMAIN 表，共 77,608 条）。
-  * **懒人版·改版**：内联 **3**；远端引用行 **11** = `RULE-SET` 9 + `DOMAIN-SET` 2 = 上游 11 + **自建 0** —— **`[Rule]` 段与 `通用版` 逐行一致**（已用脚本断言），差别只在外层骨架来自 johnshall；规则条目实测 **7,725**（上游 `master` 漂移，与通用版同一批表）。
+  * **懒人版·改版**：内联 **3**；远端引用行 **12** = `RULE-SET` 10 + `DOMAIN-SET` 2 = blackmatrix7 **11** + **Johnshall 1** + 自建 0 —— 其中 14 条 `[Rule]` 生效行与 `通用版` **逐行一致**（脚本断言），多的那 1 条是 2026-10-16 的 A1 实验（Johnshall 广告表）。blackmatrix7 那批实测 **7,725** 条；Johnshall 广告表 **57,856** 条（每天 08:00 重建）。
   * **黑名单·极简版**：内联 **1**（只有 `FINAL,DIRECT`）；远端引用行 **18** = `RULE-SET` 15 + `DOMAIN-SET` 3 = 上游 16 + 自建 2（`bytedance-ad.list` / `direct-custom.list`）。
 * **自用版 与 通用版 的差异**：自用版多挂 4 张自建表（`direct-custom` 直连 + `bytedance-ad` / `soul-ad` / `reject-custom` 拦截）；通用版**纯公开上游**，不带任何自建表 —— 别人的拦截/放行目标与作者不同，挂自建表对别人没意义。（2026-10-14 通用版曾临时停用 4 个广告/隐私拦截集，当晚已恢复，两份拦截段重新一致。）
 * ⚠️ **顺序不是小事（2026-10-07 踩过）**：`bytedance-ad.list` 含 `-ad-sign`、`-misc-lf` 等**族关键字**，必须排在 `direct-custom.list` **之后**；它一度被排在前面，于是 `p3-reading-sign.fqnovelpic.com` / `p9-…`（番茄/红果的**图片 CDN**，直连表里专门为它加的 `fqnovelpic.com`）被关键字抢先 `REJECT-DROP` ⇒ **红果/番茄图片加载失败、App 报网络异常**。给别人的通用版已不含自建表，天然没有这个坑。
@@ -73,7 +73,7 @@
 
 ## 🧩 用到的规则集
 
-清单下表**从四份 conf 的 `[Rule]` 段实际解析**（✅ = 该版本挂了这条；下表两列是**白名单模式**的两份；`懒人版·改版` 与 `通用版` 逐行相同）。全部上游规则集来自 **[blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)**，经作者自建加速站 `git.521989.xyz` 拉取：
+清单下表**从四份 conf 的 `[Rule]` 段实际解析**（✅ = 该版本挂了这条；下表两列是**白名单模式**的两份；`懒人版·改版` = `通用版` 的 14 条 + 1 条 Johnshall 广告表）。全部上游规则集来自 **[blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)**，经作者自建加速站 `git.521989.xyz` 拉取：
 
 | 用途 | 规则集（动作） | 自用版 | 通用版 |
 | :--- | :--- | :---: | :---: |
@@ -95,7 +95,7 @@
 | **直连** | `Download.list`（`DIRECT`） | ✅ | ✅ |
 | **代理** | `GlobalMedia.list`（`PROXY`） | ✅ | ✅ |
 
-* **上游**（blackmatrix7）规则集：自用版 **13 条**、通用版 **11 条**（2026-10-15 通用版停用两张 DOMAIN 大表后不再一致）、懒人版·改版 **11 条**（与通用版同一批）；此外自用版另有 4 张自建表。黑名单版的上游是另一套（见下）。
+* **上游**（blackmatrix7）规则集：自用版 **13 条**、通用版 **11 条**（2026-10-15 通用版停用两张 DOMAIN 大表后不再一致）、懒人版·改版 **11 条**（与通用版同一批）+ **Johnshall 广告表 1 条**（另一套上游，见下）；此外自用版另有 4 张自建表。黑名单版的上游是另一套（见下）。
 
 **黑名单·极简版 与上面两列的差异**（`FINAL,DIRECT` 兜底，只有这里列出的条目不同）：
 
@@ -134,6 +134,11 @@
 
 * **依赖**：四份配置的规则集都经作者自建加速站 `git.521989.xyz` 拉取（上游是 raw 的 Fastly 缓存，5 分钟级）。加速站不可达时规则集会全部拉取失败、整份退化成各自的兜底（白名单 `FINAL,PROXY`、黑名单 `FINAL,DIRECT`）；此时把前缀换成自备镜像即可。
 * **给别人的是通用版**：通用版 = 纯公开上游（不含作者自建表），拿过去就能用；**拦截段与 `自用版` 一致**（5 个拦截集全开，含广告/隐私/HTTPDNS）；`自用版` 是作者自用主用配置（含自建清单与个人取舍），别人导入可能出现「本来该直连的域掉进代理」之类的差异。
+* **懒人版·改版的 A1 实验（2026-10-16，待真机验证）**：拦截段接入 Johnshall `release/sr_ad_only.conf`（**57,856 条**，EasyList / EasyList China / Peter Lowe / 乘风 / 手工 iOS 规则，每天 08:00 CST 重建），走自建加速站。**+57,728 显式域名**，而 `通用版` 现在只有 22 条显式域名 + 196 关键词 + 237 IP-CIDR（两套语料互补：关键词只覆盖 Johnshall 那批的 **0.2%**）。
+  * ⚠️ **格式未验证**：该文件是 `.conf`（首行 `[Rule]`、逐条自带 `Reject`），不是 `.list`。已知 SR 会解析规则集里的逐条动作（见 2026-09-30 `reject-custom.list` 那条经验），行上的 `REJECT-DROP` 会覆盖表内 `Reject`；**唯一未知是首行 `[Rule]` 会不会被判为畸形规则** ⇒ 整条可能不生效。
+  * **回滚**：删掉那一行即可，其余 14 条不受影响。
+  * **代价**：每次更新下载量 0.16 MB → **≈ 2.46 MB**；手机侧规则总量 7,725 → ≈ 65,581（在已实测的 85,336 档位内）。
+  * **排序核查**：与 `China_Domain` / `Apple_Domain` / `Apple` / `Lan` / `STUN` / `Download` / `GlobalMedia` 的精确域交集均为 **0**，仅与 `ChinaMedia` 有 **1** 条重叠（那 1 个域由 `DIRECT` 变 `REJECT-DROP`）。
 * **懒人版·改版的两处已知项**（2026-10-16 记录，**按 owner 指令保留 johnshall 原文、未改**）：
   1. **`[MITM]` 盖不住 `g.cn`** —— `[URL Rewrite]` 里有两条 302（`g.cn` / `google.cn` → `google.com`），但骨架的 `hostname = *.google.cn` **不匹配 `www.g.cn`** ⇒ 那条重写在 HTTPS 下解不开密、实际不生效。通用版的写法是 `hostname = google.cn, *.google.cn, g.cn, *.g.cn`（外加 `h2 = true`）。
   2. **`[General]` 与通用版有三处不同**：`hijack-dns`（`8.8.8.8:53,8.8.4.4:53` vs `*:53`）、`dns-direct-fallback-proxy`（`true` vs `false`）、DNS 上游（国内 DoH vs DoT 裸 IP）。第一条在「白名单模式 + 国内直连为主」的规则下影响面比原配置更大。
